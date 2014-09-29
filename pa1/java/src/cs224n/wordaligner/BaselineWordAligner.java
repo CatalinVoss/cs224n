@@ -53,3 +53,4 @@ public class BaselineWordAligner implements WordAligner {
     }
   }
 }
+  

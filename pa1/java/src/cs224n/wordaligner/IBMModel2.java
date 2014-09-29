@@ -11,7 +11,7 @@ import java.util.List;
 public class IBMModel2 implements WordAligner {
   @Override
   public Alignment align(SentencePair sentencePair) {
-  // TODO: implement  
+    // TODO: implement  
     return new Alignment();
   }
 
