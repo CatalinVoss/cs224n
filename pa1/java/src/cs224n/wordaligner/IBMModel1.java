@@ -16,14 +16,14 @@ public class IBMModel1 implements WordAligner {
 
 	private CounterMap<String, String> source_target_counts;
 	private Counter<String> source_counts;
-	private Counter<Pair<String, String>> t_map; //i.e. stores the map of t[f|e] parameters
+	private CounterMap<String, String> t_map; //i.e. stores the map of t[f|e] parameters
 
   @Override
   public Alignment align(SentencePair sentencePair) {
 		Alignment alignment = new Alignment();	
 
-    List<String> targetWords = pair.getTargetWords();
-    List<String> sourceWords = pair.getSourceWords();
+    List<String> targetWords = sentencePair.getTargetWords();
+    List<String> sourceWords = sentencePair.getSourceWords();
 
 
     //TODO:: FINISH IMPLEMENTING ME!!!!
@@ -39,18 +39,18 @@ public class IBMModel1 implements WordAligner {
   private void reset_counts () {
   	for (String key : source_target_counts.keySet()) {
   		for (String value : source_target_counts.getCounter(key).keySet()){
-  			source_target_counts.setCount (key, value, 0);
+  			source_target_counts.setCount (key, value, 0.);
   		}
   	}
 
   	for (String key : source_counts.keySet()){
-  		source_counts.setCount (key, 0);
+  		source_counts.setCount (key, 0.);
   	}
   }
 
 
 
-  //evenutally we should experiment with what type of uniform
+  //JM: evenutally we should experiment with what type of uniform
   //initialization gives us the best result.
   // JM: Optimization--don't need to loop through the training set 
   // 			Can wait until the value is needed to initialize
@@ -60,53 +60,56 @@ public class IBMModel1 implements WordAligner {
   			for (String target : pair.getTargetWords()){
   				source_target_counts.setCount(source, target, 0);
   				source_counts.setCount(source, 0);
-  				Pair<String, String> word_pair = new Pair<String, String> (target, source);
-  				t_map.setCount(word_pair, uniform_initial_param);
+  				t_map.setCount(target, source, uniform_initial_param);
   			}
   		}
   	}
   }
 
   private void update_paramaters (){
-  	for (Pair<String, String> pair : t_map.keySet()){
-  		double val = source_target_counts.getCount(pair.getFirst(), 
-  																							 pair.getSecond()) / 
-  																							 source_counts.getCount(pair.getSecond()); 
-  		t_map.setCount(pair, val);
+  	for(String target : t_map.keySet()) {
+  		for (String source: t_map.getCounter(target).keySet()) {
+  			double next_val = source_target_counts.getCount(source, target) 
+  										 		/ source_counts.getCount(source);
+  			t_map.setCount(target, source, next_val);
+  		}
   	}
-  }
+ 	}
 
+ 	//TODO:: NEED TO HANDLE NULL WORDS!
   @Override
-  public void train(List<SentencePair> trainingData){ //NEED TO HANDLE NULL WORDS!!!!!
+  public void train(List<SentencePair> trainingData){ 
   	source_target_counts = new CounterMap<String, String>();
 		source_counts = new Counter<String>();
-		t_map = new Counter<Pair<String, String>>(); 
+		t_map = new CounterMap<String, String>(); 
 
   	initialize_parameters (trainingData);
 
+  	//TODO:: UPDATE STOPPING CRITERIA 
   	for (int num_iters = 0; num_iters < max_iterations; num_iters++){
   		//reset all of the counts to 0
   		reset_counts ();
 
   		//estimation step
   		for (SentencePair pair : trainingData) {
+  			//extract words from training data
   			List<String> source_sentence = pair.getSourceWords ();
   			List<String> target_sentence = pair.getTargetWords ();
 
 
-  			for (String source : source_sentence){	//we can probability optimize this
+  			//JM: we can optimize to avoid computing the
+  			//  	normalization constant each time
+  			for (String source : source_sentence){	
   				for (String target : target_sentence){
 
   					double normalize_val = 0;
   					for (String prior : source_sentence) {
-  						Pair<String, String> temp = new Pair<String, String> (target, prior); //clean this up
-  						normalize_val += t_map.getCount(temp);
+  						normalize_val += t_map.getCount(target, prior);
   					}
 
-  					Pair<String, String> temp = new Pair<String, String> (target, source);	//clean this up
-  				  double delta = t_map.getCount(temp) / normalize_val;
+  				  double delta = t_map.getCount(target, source) / normalize_val;
 
-  					source_target_counts.incrementCount(target, source, delta);
+  					source_target_counts.incrementCount(source, target, delta);
   					source_counts.incrementCount(source, delta);
   				}
   			}
@@ -115,8 +118,6 @@ public class IBMModel1 implements WordAligner {
   		//maximization step
   		update_paramaters ();
   	}
-
-  	// System.out.println(t_map.toString());
   }
 
 }
