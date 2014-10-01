@@ -38,7 +38,7 @@ public class IBMModel2 implements WordAligner {
 
  		//TODO:: FINISH THE IMPLEMENTING THE ALIGNMENT ALGORITHM
  		// This should be almost identical to MODEL1, taking into account
- 		// the q() parameters in the argmax.
+ 		// the q() parameters in the argmax computation.
 
   	return alignment;
   }
@@ -65,7 +65,7 @@ public class IBMModel2 implements WordAligner {
   		source_counts.setCount (key, 0.);
   	}
 
-  	//TODO:: RESET THE COUNTS FOR c(j | i, l m) counters
+  	//TODO:: RESET THE COUNTS FOR c(j | i, l m) and c(l, m) counters
   }
 
  	private void initialize_parameters (List<SentencePair> trainingData) {
@@ -84,7 +84,7 @@ public class IBMModel2 implements WordAligner {
   			}
   		}
 
-  		//Initialize the translation counters
+  		//Initialize the translation probability counters
   		for (String source : pair.getSourceWords()){
   			for (String target : pair.getTargetWords()){
   				source_target_counts.setCount(source, target, 0);
@@ -108,8 +108,8 @@ public class IBMModel2 implements WordAligner {
 			List<String> source_sentence = pair.getSourceWords ();
 			List<String> target_sentence = pair.getTargetWords ();
 
-			//JM: we can optimize to avoid computing the
-			//  	normalization constant each time
+			//JM: do we need optimize to avoid computing the
+			//  	normalization constant each time?
 			for (String source : source_sentence){	
 				for (String target : target_sentence){
 
@@ -138,7 +138,7 @@ public class IBMModel2 implements WordAligner {
   			double next_val = source_target_counts.getCount(source, target) 
   										 		/ source_counts.getCount(source);
 
-  			//TODO:: Experiment with the convergence conditions
+  			//TODO:: Experiment with different convergence conditions here
   			double prev_val = t_params.getCount(target, source);	
   			if (Math.abs(prev_val - next_val) > 10e-04){
   				converged = false;
