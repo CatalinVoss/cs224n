@@ -138,7 +138,6 @@ public class IBMModel1 implements WordAligner {
 			//extract words from training data
 			List<String> source_sentence = pair.getSourceWords ();
 			List<String> target_sentence = pair.getTargetWords ();
-			source_sentence.add(NULLWORD);
 
 			//JM: we can optimize to avoid computing the
 			//  	normalization constant each time
@@ -159,6 +158,8 @@ public class IBMModel1 implements WordAligner {
 		}
  	}
 
+  //NOTE: This functions actually adds --NULL-- tokens to each of the 
+  //source sentences in the training set.
   @Override
   public void train(List<SentencePair> trainingData){ 
   	source_target_counts = new CounterMap<String, String>();
@@ -177,11 +178,40 @@ public class IBMModel1 implements WordAligner {
   		//estimation step
   		estimate_parameters (trainingData);
 
-  		//maximization step
-  		boolean converged = update_paramaters ();
-  		if (converged)
+  		//maximization step, returns TRUE if the M step converged
+  		if (update_paramaters ())
   			break;
   	}
   }
 
+
+  //Allows Model2 to use the t(e | f) parameters from model1 as initialized
+  //values... does not add NULL tokens to the training data, but assumes
+  //the calling function has already done so
+  //
+  // JM: There should be a cleaner/clearer/more space/time efficient way 
+  //     to do this
+  public void initialize_t_parameters (List<SentencePair> trainingData, 
+                                       CounterMap<String, String> source_target_counts_, 
+                                       Counter<String> source_counts_, 
+                                       CounterMap<String, String> t_map_) {
+    source_target_counts = source_target_counts_;
+    source_counts = source_counts_;
+    t_map = t_map_;
+
+    initialize_parameters (trainingData);
+
+    //TODO:: Experiment with convergence criteria 
+    for(int num_iters = 0; num_iters < max_iterations; num_iters++){
+      //reset all of the counts to 0
+      reset_counts ();
+
+      //estimation step
+      estimate_parameters (trainingData);
+
+      //maximization step, returns TRUE if the M step converged
+      if (update_paramaters ())
+        break;
+    }
+  }
 }
