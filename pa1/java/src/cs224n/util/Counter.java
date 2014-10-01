@@ -25,6 +25,13 @@ public class Counter <E> implements Serializable {
     return entries.keySet();
   }
 
+  public void normalize() {
+    double total = totalCount();
+    for (E key : keySet()) {
+      setCount(key, getCount(key) / total);
+    }
+  }
+
   /**
    * The number of entries in the counter (not the total count -- use totalCount() instead).
    */

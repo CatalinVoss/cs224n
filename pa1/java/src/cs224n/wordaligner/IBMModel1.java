@@ -18,7 +18,7 @@ public class IBMModel1 implements WordAligner {
 
 	private CounterMap<String, String> source_target_counts;
 	private Counter<String> source_counts;
-	private CounterMap<String, String> t_map; //i.e. stores the map of t[e|f] parameters
+	public CounterMap<String, String> t_map; //i.e. stores the map of t[e|f] parameters
 
 	/**
 	 * Following the Collins handout, for English word e_i, the alignment
@@ -185,33 +185,33 @@ public class IBMModel1 implements WordAligner {
   }
 
 
-  //Allows Model2 to use the t(e | f) parameters from model1 as initialized
-  //values... does not add NULL tokens to the training data, but assumes
-  //the calling function has already done so
-  //
-  // JM: There should be a cleaner/clearer/more space/time efficient way 
-  //     to do this
-  public void initialize_t_parameters (List<SentencePair> trainingData, 
-                                       CounterMap<String, String> source_target_counts_, 
-                                       Counter<String> source_counts_, 
-                                       CounterMap<String, String> t_map_) {
-    source_target_counts = source_target_counts_;
-    source_counts = source_counts_;
-    t_map = t_map_;
+  // //Allows Model2 to use the t(e | f) parameters from model1 as initialized
+  // //values... does not add NULL tokens to the training data, but assumes
+  // //the calling function has already done so
+  // //
+  // // JM: There should be a cleaner/clearer/more space/time efficient way 
+  // //     to do this
+  // public void initialize_t_parameters (List<SentencePair> trainingData, 
+  //                                      CounterMap<String, String> source_target_counts_, 
+  //                                      Counter<String> source_counts_, 
+  //                                      CounterMap<String, String> t_map_) {
+  //   source_target_counts = source_target_counts_;
+  //   source_counts = source_counts_;
+  //   t_map = t_map_;
 
-    initialize_parameters (trainingData);
+  //   initialize_parameters (trainingData);
 
-    //TODO:: Experiment with convergence criteria 
-    for(int num_iters = 0; num_iters < max_iterations; num_iters++){
-      //reset all of the counts to 0
-      reset_counts ();
+  //   //TODO:: Experiment with convergence criteria 
+  //   for(int num_iters = 0; num_iters < max_iterations; num_iters++){
+  //     //reset all of the counts to 0
+  //     reset_counts ();
 
-      //estimation step
-      estimate_parameters (trainingData);
+  //     //estimation step
+  //     estimate_parameters (trainingData);
 
-      //maximization step, returns TRUE if the M step converged
-      if (update_paramaters ())
-        break;
-    }
-  }
+  //     //maximization step, returns TRUE if the M step converged
+  //     if (update_paramaters ())
+  //       break;
+  //   }
+  // }
 }
