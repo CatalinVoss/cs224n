@@ -24,8 +24,8 @@ public class IBMModel2 implements WordAligner {
 	private Counter<String> source_counts;	//map of c[f] counts
 
 	//JM: Is there a better way to compactly represent these counters?
-	private CounterMap<Integer, List<Integer>> q_params; 	//map of q[j | i, l, m] parameters
-	private CounterMap<Integer, List<Integer>>  align_len_count; //map of c[j | i, l, m] counts
+	private CounterMap<List<Integer>, Integer> q_params; 	//map of q[j | i, l, m] parameters
+	private CounterMap<List<Integer>, Integer>  align_len_count; //map of c[j | i, l, m] counts
 	private CounterMap<Integer, Integer> sent_len_count; 	//map of c[l, m] counts
 	
 
@@ -50,7 +50,7 @@ public class IBMModel2 implements WordAligner {
     		double t_param = t_params.getCount(target_word, source_word);
 
     		List<Integer> prior = Arrays.asList(i, source_len, target_len);
-    		double q_param = q_params.getCount(j, prior);
+    		double q_param = q_params.getCount(prior, j);
 
     		double prob = t_param * q_param;
     		//update the new most likely alignment
@@ -99,9 +99,9 @@ public class IBMModel2 implements WordAligner {
   	}
 
   	//reset the counts for the c(j | i, l, m) counters
-  	for (int j : align_len_count.keySet()) {
-  		for (List<Integer> prior : align_len_count.getCounter(j).keySet()) {
-  			align_len_count.setCount(j, prior, 0.);
+  	for (List<Integer> prior : align_len_count.keySet()) {
+  		for (int j : align_len_count.getCounter(prior).keySet()) {
+  			align_len_count.setCount(prior, j, 0.);
   		}	
   	}
   }
@@ -117,10 +117,16 @@ public class IBMModel2 implements WordAligner {
   		for (int i = 0; i < target_len; i++) {
   			for (int j = 0; j < source_len; j++) {
   				List<Integer> prior = Arrays.asList(i, source_len, target_len);
-  				align_len_count.setCount(j, prior, 0.);
-  				q_params.setCount(j, prior, Math.random());
+  				align_len_count.setCount(prior, j, 0.);
+  				q_params.setCount(prior, j, Math.random());
   			}
   		}
+
+  		//normalize each of the q parameters
+  		for (List<Integer> prior : q_params.keySet()) {
+  			Counters.normalize(q_params.getCounter(prior));
+  		}
+
 
 
   		//Initialize the translation probability counters
@@ -161,7 +167,7 @@ public class IBMModel2 implements WordAligner {
 					String source = source_sentence.get(j);
 					List<Integer> prior = Arrays.asList(i, source_len, target_len);
 					normalize_val += t_params.getCount(target, source) * 
-														q_params.getCount(j, prior);
+														q_params.getCount(prior, j);
 				}
 
 				//iterate over the source sentence
@@ -169,12 +175,12 @@ public class IBMModel2 implements WordAligner {
 					String source = source_sentence.get(j);
 					List<Integer> prior = Arrays.asList(i, source_len, target_len);
 					double delta = (t_params.getCount(target, source) *
-													 q_params.getCount(j, prior)) / normalize_val;
+													 q_params.getCount(prior, j)) / normalize_val;
 
 					//update the counters
 					source_target_counts.incrementCount(source, target, delta);
 					source_counts.incrementCount(source, delta);
-					align_len_count.incrementCount(j, prior, delta);
+					align_len_count.incrementCount(prior, j, delta);
 	 				sent_len_count.incrementCount(source_len, target_len, delta);
 				}	
 			}
@@ -208,16 +214,16 @@ public class IBMModel2 implements WordAligner {
  					for (int j = 0; j < source_len; j++) {
  						List<Integer> prior = Arrays.asList(i, source_len, target_len);
 
- 						double next_val = align_len_count.getCount(j, prior) /
+ 						double next_val = align_len_count.getCount(prior, j) /
  															sent_len_count.getCount (source_len, target_len);
 
  						//TODO:: Experiment with different convergence conditions here
-  					double prev_val = q_params.getCount(j, prior);	
+  					double prev_val = q_params.getCount(prior, j);	
   					if (Math.abs(prev_val - next_val) > 10e-04){
   						converged = false;
   					}
 
-						q_params.setCount(j, prior, next_val);
+						q_params.setCount(prior, j, next_val);
 					}
  				}
  			}
@@ -232,8 +238,8 @@ public class IBMModel2 implements WordAligner {
     source_target_counts = new CounterMap<String, String> ();
     source_counts = new Counter<String> ();
     t_params = new CounterMap<String, String> ();
-    q_params = new CounterMap<Integer, List<Integer>> ();
-	  align_len_count = new CounterMap<Integer, List<Integer>> ();
+    q_params = new CounterMap<List<Integer>, Integer> ();
+	  align_len_count = new CounterMap<List<Integer>, Integer> ();
 	 	sent_len_count = new CounterMap<Integer, Integer> (); 
 
 
