@@ -28,8 +28,7 @@ public class IBMModel2 implements WordAligner {
 	//JM: Is there a better way to compactly represent these counters?
 	private CounterMap<List<Integer>, Integer> q_params; 	//map of q[j | i, l, m] parameters
 	private CounterMap<List<Integer>, Integer>  align_len_count; //map of c[j | i, l, m] counts
-	private CounterMap<Integer, Integer> sent_len_count; 	//map of c[l, m] counts
-	
+	private Counter<List<Integer>> sent_len_count; 	//map of c[l, m] counts
 
   @Override
   public Alignment align(SentencePair sentencePair) { 
@@ -49,7 +48,7 @@ public class IBMModel2 implements WordAligner {
     	int best_idx = 0;
     	for (int j = 0; j < source_len; j++) {
     		String source_word = source_sentence.get(j);
-    		double t_param = t_params.getCount(target_word, source_word);
+    		double t_param = t_params.getCount(source_word, target_word);
 
     		List<Integer> prior = Arrays.asList(i, source_len, target_len);
     		double q_param = q_params.getCount(prior, j);
@@ -96,10 +95,8 @@ public class IBMModel2 implements WordAligner {
   	}
 
   	//reset the counts for the c(l, m) counters
-  	for(int source_len : sent_len_count.keySet()) {
-  		for(int target_len : sent_len_count.getCounter(source_len).keySet()){
-  			sent_len_count.setCount(source_len, target_len, 0.);
-  		}
+  	for(List<Integer> tuple : sent_len_count.keySet()) {
+			sent_len_count.setCount(tuple, 0.);
   	}
 
   	//reset the counts for the c(j | i, l, m) counters
@@ -115,7 +112,6 @@ public class IBMModel2 implements WordAligner {
   		// Initialize the alignment counters and q parameters
   		int source_len = pair.getSourceWords().size()+1;
   		int target_len = pair.getTargetWords().size();
-  		// sent_len_count.setCount(source_len, target_len, 0.); // not necessary, done at every iteration
 
   		for (int i = 0; i < target_len; i++) {
   			for (int j = 0; j < source_len; j++) {
@@ -139,7 +135,7 @@ public class IBMModel2 implements WordAligner {
   	// Initialize the t[e | f] parameters using model 1
   	model1 = new IBMModel1 ();
     model1.train(trainingData);
-    t_params = model1.t_map;
+    t_params = model1.t_params;
  	}
 
  	private void estimate_parameters (List<SentencePair> trainingData) {
@@ -157,25 +153,20 @@ public class IBMModel2 implements WordAligner {
 				//compute normalization term
 				double normalize_val = 0.;
         List<Integer> prior = Arrays.asList(i, source_len, target_len);
-        
-        System.out.println("this value should be 1: "+q_params.getCounter(prior).totalCount());
 
 				for (int j = 0; j < source_len; j++) {
+          String source = source_sentence.get(j);
 
-          // System.out.println("poop; "+prior.toString()+q_params.getCounter(prior).totalCount());
+          // System.out.println("q value should be 1: "+q_params.getCounter(prior).totalCount());
+          // System.out.println("t value should be 1: "+t_params.getCounter(source).totalCount());
 
-					String source = source_sentence.get(j);
-          // System.out.println("t: "+t_params.getCount(target, source)+" q: "+q_params.getCount(prior, j));
-					normalize_val += t_params.getCount(target, source) * 
-														q_params.getCount(prior, j);
+					normalize_val += t_params.getCount(source, target) * q_params.getCount(prior, j);
 				}
-
-        // System.out.println("norm: "+normalize_val);
 
 				//iterate over the source sentence
 				for (int j = 0; j < source_len; j++){
 					String source = source_sentence.get(j);
-					double delta = (t_params.getCount(target, source) *
+					double delta = (t_params.getCount(source, target) *
 													 q_params.getCount(prior, j)) / normalize_val;
 
           // System.out.println("delta: "+delta);
@@ -184,7 +175,7 @@ public class IBMModel2 implements WordAligner {
 					source_target_counts.incrementCount(source, target, delta);
 					source_counts.incrementCount(source, delta);
 					align_len_count.incrementCount(prior, j, delta);
-	 				sent_len_count.incrementCount(source_len, target_len, delta);
+	 				sent_len_count.incrementCount(prior, delta);
 				}	
 			}
 		}
@@ -196,42 +187,38 @@ public class IBMModel2 implements WordAligner {
 
  		//update the t[e, f] parameters
     // assert: t_params size properly initialized
- 		for (String target : t_params.keySet()){
- 			for (String source: t_params.getCounter(target).keySet()) {
+ 		for (String source : t_params.keySet()){
+ 			for (String target: t_params.getCounter(source).keySet()) {
   			double next_val = source_target_counts.getCount(source, target) 
   										 		/ source_counts.getCount(source);
 
   			//TODO:: Experiment with different convergence conditions here
-  			double prev_val = t_params.getCount(target, source);	
+  			double prev_val = t_params.getCount(source, target);	
   			if (Math.abs(prev_val - next_val) > 10e-04){
   				converged = false;
   			}
 
-  			t_params.setCount(target, source, next_val);
+  			t_params.setCount(source, target, next_val);
   		}
  		}
 
  		//iterate over all possible l, m combinations in the training data
- 		for (int source_len : sent_len_count.keySet()) {
- 			for (int target_len : sent_len_count.getCounter(source_len).keySet()){
- 				for (int i = 0; i < target_len; i++) {
-          List<Integer> prior = Arrays.asList(i, source_len, target_len);
- 					for (int j = 0; j < source_len; j++) {
- 						double next_val = align_len_count.getCount(prior, j) /
- 															sent_len_count.getCount (source_len, target_len);
+ 		for (List<Integer> tuple : sent_len_count.keySet()) {
+      // List<Integer> prior = Arrays.asList(i, source_len, target_len);
+    	for (int j = 0; j < tuple.get(1); j++) {
+    		double next_val = align_len_count.getCount(tuple, j) /
+    											sent_len_count.getCount (tuple);
 
- 						//TODO:: Experiment with different convergence conditions here
-  					double prev_val = q_params.getCount(prior, j);	
-  					if (Math.abs(prev_val - next_val) > 10e-04){
-  						converged = false;
-  					}
+    		//TODO:: Experiment with different convergence conditions here
+      	double prev_val = q_params.getCount(tuple, j);	
+      	if (Math.abs(prev_val - next_val) > 10e-04){
+      		converged = false;
+      	}
 
-						q_params.setCount(prior, j, next_val);
-					}
-          // System.out.println("this value should be 1: "+q_params.getCounter(prior).totalCount());
-          // assert q_params.getCounter(prior).totalCount == 1
- 				}
- 			}
+      	q_params.setCount(tuple, j, next_val);
+      }
+      // System.out.println("this value should be 1: "+q_params.getCounter(prior).totalCount());
+      // assert q_params.getCounter(prior).totalCount == 1
  		}
 
  		return converged;
@@ -245,7 +232,7 @@ public class IBMModel2 implements WordAligner {
     t_params = new CounterMap<String, String> ();
     q_params = new CounterMap<List<Integer>, Integer> ();
 	  align_len_count = new CounterMap<List<Integer>, Integer> ();
-	 	sent_len_count = new CounterMap<Integer, Integer> (); 
+	 	sent_len_count = new Counter<List<Integer>> (); 
 
     // Initialize parameters using Model 1
     // This will add NULL word to all source sentences in data

@@ -18,7 +18,7 @@ public class IBMModel1 implements WordAligner {
 
 	private CounterMap<String, String> source_target_counts;
 	private Counter<String> source_counts;
-	public CounterMap<String, String> t_map; //i.e. stores the map of t[e|f] parameters
+	public CounterMap<String, String> t_params; // i.e. stores the map of t[e|f] parameters
 
 	/**
 	 * Following the Collins handout, for English word e_i, the alignment
@@ -44,7 +44,7 @@ public class IBMModel1 implements WordAligner {
     	int best_idx = 0;
     	for (int j = 0; j < source_sentence.size(); j++) {
     		String source_word = source_sentence.get(j);
-    		double prob = t_map.getCount(target_word, source_word);
+    		double prob = t_params.getCount(source_word,target_word);
 
     		//update the new most likely alignment
     		if (prob > curr_max) {
@@ -101,32 +101,38 @@ public class IBMModel1 implements WordAligner {
 
   	//Uniformly initializes the t() paramaters t(e,f) = 1/(|F|), where |F|
   	//is the number of distinct words f \in F.
-  	double initial_val = 1.0 / (source_counts.keySet().size());
+  	double initial_val = 7353; //1.0 / (source_counts.keySet().size());
 
   	for(SentencePair pair : trainingData) {
   		for (String source : pair.getSourceWords()) {
   			for (String target : pair.getTargetWords()) {
-  				t_map.setCount(target, source, initial_val);
+  				t_params.setCount(source, target, initial_val);
   			}
   		}
   	}
+
+    t_params = Counters.conditionalNormalize(t_params);
+
+    // for (String source : t_params.keySet()) {
+    //   System.out.println("t value should be 1: "+t_params.getCounter(source).totalCount());
+    // }
   }
 
  	 private boolean update_paramaters (){
  	 	boolean converged = true;
-  	for(String target : t_map.keySet()) {
-  		for (String source: t_map.getCounter(target).keySet()) {
+  	for(String source : t_params.keySet()) {
+  		for (String target : t_params.getCounter(source).keySet()) {
   			double next_val = source_target_counts.getCount(source, target) 
   										 		/ source_counts.getCount(source);
 
   			//repeat until probabilities for all words don't change
   			// by more than 10e-4 on some iteration
-  			double prev_val = t_map.getCount(target, source);	
+  			double prev_val = t_params.getCount(source, target);	
   			if (Math.abs(prev_val - next_val) > 10e-04){
   				converged = false;
   			}
 
-  			t_map.setCount(target, source, next_val);
+  			t_params.setCount(source, target, next_val);
   		}
   	}
 
@@ -146,10 +152,10 @@ public class IBMModel1 implements WordAligner {
 
 					double normalize_val = 0;
 					for (String prior : source_sentence) {
-						normalize_val += t_map.getCount(target, prior);
+						normalize_val += t_params.getCount(prior, target);
 					}
 
-				  double delta = t_map.getCount(target, source) / normalize_val;
+				  double delta = t_params.getCount(source, target) / normalize_val;
 
 					source_target_counts.incrementCount(source, target, delta);
 					source_counts.incrementCount(source, delta);
@@ -164,7 +170,7 @@ public class IBMModel1 implements WordAligner {
   public void train(List<SentencePair> trainingData){ 
   	source_target_counts = new CounterMap<String, String>();
 		source_counts = new Counter<String>();
-		t_map = new CounterMap<String, String>(); 
+		t_params = new CounterMap<String, String>(); 
 
 		add_null_words (trainingData);
 
@@ -194,10 +200,10 @@ public class IBMModel1 implements WordAligner {
   // public void initialize_t_parameters (List<SentencePair> trainingData, 
   //                                      CounterMap<String, String> source_target_counts_, 
   //                                      Counter<String> source_counts_, 
-  //                                      CounterMap<String, String> t_map_) {
+  //                                      CounterMap<String, String> t_params_) {
   //   source_target_counts = source_target_counts_;
   //   source_counts = source_counts_;
-  //   t_map = t_map_;
+  //   t_params = t_params_;
 
   //   initialize_parameters (trainingData);
 
