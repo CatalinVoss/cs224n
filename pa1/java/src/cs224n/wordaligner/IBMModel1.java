@@ -16,9 +16,6 @@ public class IBMModel1 implements WordAligner {
 	// NULL word
   private final static String NULLWORD = "--NULL--";
 
-  private double default_val;
-  private boolean first_time;
-
 	private CounterMap<String, String> source_target_counts;
 	private Counter<String> source_counts;
 	public CounterMap<String, String> t_params; // i.e. stores the map of t[e|f] parameters
@@ -62,6 +59,7 @@ public class IBMModel1 implements WordAligner {
     	alignment.addPredictedAlignment(i, best_idx);
     }
 
+
   	return alignment;
   }
 
@@ -103,25 +101,17 @@ public class IBMModel1 implements WordAligner {
 
   	//Uniformly initializes the t() paramaters t(e,f) = 1/(|F|), where |F|
   	//is the number of distinct words f \in F.
-  	// double initial_val = 7353; //1.0 / (source_counts.keySet().size());
+  	double initial_val = 7353; //1.0 / (source_counts.keySet().size());
 
-    int num_targets = 0;
-    for (String source : source_target_counts.keySet()){
-      for (String target : source_target_counts.getCounter (source).keySet()){
-        num_targets++;
-      }
-    }
-    default_val = 1.0 / double(num_targets);
+  	for(SentencePair pair : trainingData) {
+  		for (String source : pair.getSourceWords()) {
+  			for (String target : pair.getTargetWords()) {
+  				t_params.setCount(source, target, initial_val);
+  			}
+  		}
+  	}
 
-  	// for(SentencePair pair : trainingData) {
-  	// 	for (String source : pair.getSourceWords()) {
-  	// 		for (String target : pair.getTargetWords()) {
-  	// 			t_params.setCount(source, target, initial_val);
-  	// 		}
-  	// 	}
-  	// }
-
-   //  t_params = Counters.conditionalNormalize(t_params);
+    t_params = Counters.conditionalNormalize(t_params);
 
     // for (String source : t_params.keySet()) {
     //   System.out.println("t value should be 1: "+t_params.getCounter(source).totalCount());
@@ -162,11 +152,7 @@ public class IBMModel1 implements WordAligner {
 
 					double normalize_val = 0;
 					for (String prior : source_sentence) {
-            if (first_time){
-              normalize_val += default_val;
-            } else {
-              normalize_val += t_params.getCount(prior, target);
-            }
+						normalize_val += t_params.getCount(prior, target);
 					}
 
 				  double delta = t_params.getCount(source, target) / normalize_val;
@@ -189,7 +175,6 @@ public class IBMModel1 implements WordAligner {
 		add_null_words (trainingData);
 
   	initialize_parameters (trainingData);
-    first_time = true;
 
   	//TODO:: Experiment with convergence criteria 
   	for(int num_iters = 0; num_iters < max_iterations; num_iters++){
@@ -198,7 +183,6 @@ public class IBMModel1 implements WordAligner {
 
   		//estimation step
   		estimate_parameters (trainingData);
-      first_time = false;
 
   		//maximization step, returns TRUE if the M step converged
   		if (update_paramaters ())
