@@ -1,0 +1,22 @@
+Usage: java edu.stanford.nlp.mt.tune.OnlineTuner [OPTIONS] source_file target_file phrasal_ini initial_weights
+
+Options:
+   -uw        : Uniform weight initialization
+   -rw        : Randomize starting weights at the start of each epoch
+   -e num     : Number of online epochs
+   -o str     : Optimizer: [pro-sgd,mira-1best]
+   -of str    : Optimizer flags (format: CSV list)
+   -m str     : Gold scoring metric for the tuning algorithm (default: bleu-smooth)
+   -mf str    : Gold scoring metric flags (format: CSV list)
+   -n str     : Experiment name
+   -r str     : Use multiple references (format: CSV list)
+   -bw        : Set final weights to the best training epoch.
+   -a         : Enable Collins-style parameter averaging between epochs
+   -b num     : Mini-batch size (optimizer must support mini-batch learning
+   -l level   : Set java.logging level
+   -ef        : Expected # of features
+   -wi        : # of minibatches between intermediate weight file writeouts within an epoch
+   -fmc num   : Minimum number of times a feature must appear (default: 0)
+   -tmp path  : Temp directory (default: /tmp)
+   -p str     : Compute pseudo references with parameters <#refs,burn-in> (format: CSV list)
+   -a         : Wrap references and source inputs in boundary tokens
