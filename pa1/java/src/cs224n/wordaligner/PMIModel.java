@@ -17,9 +17,6 @@ public class PMIModel implements WordAligner {
   private Counter<String> sourceCounts; // i.e. french count
   private Counter<String> targetCounts; // i.e. english count
 
-  // NULL word
-  private final static String NULLWORD = "--NULL--";
-
   @Override  
   public Alignment align(SentencePair pair) {
     Alignment alignment = new Alignment();
@@ -27,10 +24,11 @@ public class PMIModel implements WordAligner {
     // Extract sequences from pair
     List<String> targetWords = pair.getTargetWords();
     List<String> sourceWords = pair.getSourceWords();
-    sourceWords.add(NULLWORD);
+    sourceWords.add(WordAligner.NULL_WORD);
 
     // Per piazza (https://piazza.com/class/hyxho2urgyd6bz?cid=36), we're looking for alignment for each target word.
     // CV: for efficiency's sake, those don't have to be recomputed, but....
+    // JM: TODO: Modify total counts to be amortized O(1) time operation
 
     for (int i = 0; i < targetWords.size(); i++) {
       String target = targetWords.get(i);
@@ -47,7 +45,7 @@ public class PMIModel implements WordAligner {
 
         if (score > max) {
           max = score;
-          if (source.equals(NULLWORD))
+          if (source.equals(WordAligner.NULL_WORD))
             best = -1;
           else 
             best = j;
@@ -56,7 +54,7 @@ public class PMIModel implements WordAligner {
 
       if (best == -1) {
         // TODO: sort out NULL alignment. Will currently never hit here.
-        System.out.println("The world is flat");
+        // System.out.println("NULL ALIGN!");
         // NULL-alignment is implicit.
         // If for some target word ei, our alignment model determines that the null alignment is better than any an alignment to any source word fj, we should just not add an alignment for ei (i.e., not make a call to Assignment.addPredictedAlignment)
         // Per piazza: https://piazza.com/class/hyxho2urgyd6bz?cid=42 
@@ -78,7 +76,7 @@ public class PMIModel implements WordAligner {
       // Extract sequences from pair
       List<String> targetWords = pair.getTargetWords();
       List<String> sourceWords = pair.getSourceWords();
-      sourceWords.add(NULLWORD);
+      sourceWords.add(WordAligner.NULL_WORD);
 
       // CV: Can we assume they are nonzero length?
       // Update counts
@@ -89,6 +87,12 @@ public class PMIModel implements WordAligner {
           targetCounts.incrementCount(target, 1.0);
         }
       }
+    }
+
+    // Remove null words from the training data
+    for (SentencePair sentencePair: trainingPairs) {
+      List<String> sourceWords = sentencePair.getSourceWords();
+      sourceWords.remove(sourceWords.size()-1);
     }
   }
 

@@ -41,7 +41,28 @@ public class IBMModel1 implements WordAligner {
     List<String> source_sentence = sentencePair.getSourceWords();
     source_sentence.add(WordAligner.NULL_WORD);
 
-    // TODO: alignment code!
+    for (int i = 0; i < target_sentence.size (); i++) {
+      String target = target_sentence.get (i);
+
+      double p_max = 0.0;
+      int j_max = 0;
+
+      for (int j = 0; j < source_sentence.size (); j++) {
+        String source = source_sentence.get (j);
+        double p = t.getCount(source, target);
+        if (p > p_max)
+        {
+          p_max = p;
+          j_max = j;
+        }
+      }
+
+      if (j_max != source_sentence.size () - 1){
+        alignment.addPredictedAlignment (i, j_max);
+      } else {
+        // System.out.println ("NULL ALIGN!");
+      }
+    }
 
     return alignment;
   }

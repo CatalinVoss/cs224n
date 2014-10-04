@@ -26,22 +26,19 @@ public class IBMModel2 implements WordAligner {
   @Override
   public Alignment align(SentencePair sentencePair) {
     Alignment alignment = new Alignment();
-    
+
+    List<String> sources = sentencePair.getSourceWords();
     List<String> targets = sentencePair.getTargetWords();
+    sources.add(WordAligner.NULL_WORD);    
+    
     for (int i = 0; i < targets.size(); i++) {
       String target = targets.get(i);
-      List<String> sources = sentencePair.getSourceWords();
-      sources.add(WordAligner.NULL_WORD);
-      // TODO: move out length
       
       double p_max = 0.0;
       int j_max = 0;
 
       for (int j = 0; j < sources.size(); j++) {
-      // for (int j = 0; j <= sources.size(); j++) {
-        // String source = (j < sources.size()) ? sources.get(j) : WordAligner.NULL_WORD;
         String source = sources.get(j);
-        // List<Integer> tuple = Arrays.asList(i, sources.size(), targets.size());
         List<Integer> tuple = Arrays.asList(i, sources.size()-1, targets.size());
         double p = q.getCount(tuple, j) * t.getCount(source, target);
         if (p > p_max) {
@@ -50,11 +47,10 @@ public class IBMModel2 implements WordAligner {
         }
       }
         
-      // if (j_max != sources.size()) // skip NULL
-      if (j_max != sources.size()-1) // skip NULL
+      if (j_max != sources.size() - 1) // skip NULL
         alignment.addPredictedAlignment(i, j_max);
       else
-        System.out.println("NULL ASSIGN!");
+        // System.out.println("NULL ASSIGN!");
     }
     
     return alignment;
@@ -79,11 +75,9 @@ public class IBMModel2 implements WordAligner {
       int source_len = pair.getSourceWords().size();
       int target_len = pair.getTargetWords().size();
       for (int i = 0; i < target_len; i++) {
-        List<Integer> tuple = Arrays.asList(i, source_len, target_len);
-        // List<Integer> tuple = Arrays.asList(i, source_len-1, target_len);
+        List<Integer> tuple = Arrays.asList(i, source_len - 1, target_len);
 
         for (int j = 0; j < source_len; j++) {
-        // for (int j = 0; j <= source_len; j++) {
           q.setCount(tuple, j, Math.random()+1e-7); // make sure it's not 0
         }
       }
@@ -103,6 +97,12 @@ public class IBMModel2 implements WordAligner {
       if (score < kConvergenceTol)
         break;
     }
+
+    // Remove null words
+    for (SentencePair sentencePair: trainingData) {
+      List<String> sourceWords = sentencePair.getSourceWords();
+      sourceWords.remove(sourceWords.size()-1);
+    }
   }
 
   /**
@@ -121,21 +121,16 @@ public class IBMModel2 implements WordAligner {
       
       for (int i = 0; i < target_len; i++) {
         String target = targets.get(i);
-        List<Integer> tuple = Arrays.asList(i, source_len, target_len);
-        // List<Integer> tuple = Arrays.asList(i, source_len-1, target_len);
+        List<Integer> tuple = Arrays.asList(i, source_len-1, target_len);
 
         // Compute denominator sum
         double normalizer = 0.0;
         for (int j = 0; j < source_len; j++) {
-        // for (int j = 0; j <= source_len; j++) {
           String source = sources.get(j);
-          // String source = (j < source_len) ? sources.get(j) : WordAligner.NULL_WORD;
           normalizer += (t.getCount(source, target) * q.getCount(tuple, j)); // Neither t nor q should have zero entries
         }
         for (int j = 0; j < source_len; j++) {
-        // for (int j = 0; j <= source_len; j++) {
           String source = sources.get(j);
-          // String source = (j < source_len) ? sources.get(j) : WordAligner.NULL_WORD;
           double numerator = (q.getCount(tuple, j)*t.getCount(source, target));
           double delta = numerator/normalizer;
           sourceTargetCounts.incrementCount(source, target, delta);
