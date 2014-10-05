@@ -59,8 +59,6 @@ public class IBMModel1 implements WordAligner {
 
       if (j_max != source_sentence.size () - 1){
         alignment.addPredictedAlignment (i, j_max);
-      } else {
-        // System.out.println ("NULL ALIGN!");
       }
     }
 

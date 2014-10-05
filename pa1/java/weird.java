@@ -5,66 +5,96 @@ import java.util.List;
 import java.util.Arrays;
 
 /**
- * IBM Model 1 implementation.
+ * IBM Model 2 implementation.
  * 
  * @author John Miller
  * @author Catalin Voss
  */
-public class IBMModel1 implements WordAligner {
-  private static final double kConvergenceTol = 1e-8; // TODO: check this is a good value
+public class IBMModel2 implements WordAligner {
+  private static final double kConvergenceTol = 1e-7; // TODO: check this is a good value
   private static final double kMaxIter = 100;
 
   // t(e,f) = p(e|f) = Pr([target]|[source])
+  // q(j | i, l, m)
   private CounterMap<String, String> t = null;
+  private CounterMap<List<Integer>, Integer> q = null;
+
+  // Counters
   private CounterMap<String, String> sourceTargetCounts = null;
+  private CounterMap<List<Integer>, Integer> alignmentCounts = null;
 
-  public CounterMap<String, String> getT() {
-    return t;
-  }
-
-  // Counter
-
-  /**
-   * Following the Collins handout, for English word e_i, the alignment
-   * variable a_i is given by
-   * 
-   *  a_i = argmax_{j \in {0, ..., l}} {t(e_i | f_j)},
-   *
-   * because each of the q() terms in the expression is a constant and 
-   * doesn't affect the maximum.
-   */
   @Override
   public Alignment align(SentencePair sentencePair) {
-    Alignment alignment = new Alignment();  
+    Alignment alignment = new Alignment();
+    
+    List<String> targets = sentencePair.getTargetWords();
+    for (int i = 0; i < targets.size(); i++) {
+      String target = targets.get(i);
+      List<String> sources = sentencePair.getSourceWords();
+      sources.add(WordAligner.NULL_WORD);
+      // TODO: move out length
+      
+      double p_max = 0.0;
+      int j_max = 0;
 
-    List<String> target_sentence = sentencePair.getTargetWords();
-    List<String> source_sentence = sentencePair.getSourceWords();
-    source_sentence.add(WordAligner.NULL_WORD);
-
-    // TODO: alignment code!
-
+      for (int j = 0; j < sources.size(); j++) {
+      // for (int j = 0; j <= sources.size(); j++) {
+        // String source = (j < sources.size()) ? sources.get(j) : WordAligner.NULL_WORD;
+        String source = sources.get(j);
+        // List<Integer> tuple = Arrays.asList(i, sources.size(), targets.size());
+        List<Integer> tuple = Arrays.asList(i, sources.size()-1, targets.size());
+        double p = q.getCount(tuple, j) * t.getCount(source, target);
+        if (p > p_max) {
+          p_max = p;
+          j_max = j;
+        }
+      }
+        
+      // if (j_max != sources.size()) // skip NULL
+      if (j_max != sources.size()-1) // skip NULL
+        alignment.addPredictedAlignment(i, j_max);
+      else
+        System.out.println("NULL ASSIGN!");
+    }
+    
     return alignment;
   }
 
   @Override
   public void train(List<SentencePair> trainingData) {
     // Initialize vars
-    t = new CounterMap<String,String>();
     sourceTargetCounts = new CounterMap<String, String>();
+    alignmentCounts = new CounterMap<List<Integer>, Integer>();
+    q = new CounterMap<List<Integer>, Integer>();
 
-    // Add null words. This only needs to be done once (even when running Model 2 after).
+    // Initialize probabilities. This first one adds NULL words!
+    IBMModel1 model1 = new IBMModel1();
+    model1.train(trainingData);
+    t = model1.getT();
+
     addNullWord(trainingData);
 
-    // Initialize probabilities
-    for (SentencePair sentencePair : trainingData) {
-      for (String source : sentencePair.getSourceWords())
-        for (String target : sentencePair.getTargetWords())
-          t.setCount(source, target, 1.0);
+    for (SentencePair pair : trainingData){
+      // Initialize the alignment counters and q parameters
+      int source_len = pair.getSourceWords().size();
+      int target_len = pair.getTargetWords().size();
+      for (int i = 0; i < target_len; i++) {
+        // List<Integer> tuple = Arrays.asList(i, source_len, target_len);
+        List<Integer> tuple = Arrays.asList(i, source_len-1, target_len);
+
+        for (int j = 0; j < source_len; j++) {
+        // for (int j = 0; j <= source_len; j++) {
+          q.setCount(tuple, j, Math.random()+1e-7); // make sure it's not 0
+        }
+      }
     }
-    t = Counters.conditionalNormalize(t);
+    q = Counters.conditionalNormalize(q);
+    // for (List<Integer> tuple : q.keySet()) {
+    //   assert Math.abs(q.getCounter(tuple).totalCount()-1) < 10e-04;
+    // }
 
     // Run EM-Algorithm
-    System.out.println("Running EM-Algorithm for IBM Model 1");
+    System.out.println("Running EM-Algorithm for IBM Model 2");
     for (int it = 0; it < kMaxIter; it++) {
       estimate(trainingData);
       double score = maximize();
@@ -72,12 +102,6 @@ public class IBMModel1 implements WordAligner {
 
       if (score < kConvergenceTol)
         break;
-    }
-
-    // Remove null words
-    for (SentencePair sentencePair: trainingData) {
-      List<String> sourceWords = sentencePair.getSourceWords();
-      sourceWords.remove(sourceWords.size()-1);
     }
   }
 
@@ -92,19 +116,30 @@ public class IBMModel1 implements WordAligner {
     for (SentencePair sentencePair : trainingData) {
       List<String> sources = sentencePair.getSourceWords();
       List<String> targets = sentencePair.getTargetWords();
+      int source_len = sources.size();
+      int target_len = targets.size();
+      
+      for (int i = 0; i < target_len; i++) {
+        String target = targets.get(i);
+        // List<Integer> tuple = Arrays.asList(i, source_len, target_len);
+        List<Integer> tuple = Arrays.asList(i, source_len-1, target_len);
 
-      // Compute sum_i t(e|f_i)
-      // CV: we can optimize: don't initialize this guy at every iteration
-      Counter<String> normalizer = new Counter<String>();
-      for (String target : targets) {
-        for (String source : sources)
-          normalizer.incrementCount(target, t.getCount(source, target));
-      }
-
-      for (String target : targets) {  
-        for (String source : sources) {
-          double delta = t.getCount(source, target) / normalizer.getCount(target);
+        // Compute denominator sum
+        double normalizer = 0.0;
+        for (int j = 0; j < source_len; j++) {
+        // for (int j = 0; j <= source_len; j++) {
+          String source = sources.get(j);
+          // String source = (j < source_len) ? sources.get(j) : WordAligner.NULL_WORD;
+          normalizer += (t.getCount(source, target) * q.getCount(tuple, j)); // Neither t nor q should have zero entries
+        }
+        for (int j = 0; j < source_len; j++) {
+        // for (int j = 0; j <= source_len; j++) {
+          String source = sources.get(j);
+          // String source = (j < source_len) ? sources.get(j) : WordAligner.NULL_WORD;
+          double numerator = (q.getCount(tuple, j)*t.getCount(source, target));
+          double delta = numerator/normalizer;
           sourceTargetCounts.incrementCount(source, target, delta);
+          alignmentCounts.incrementCount(tuple, j, delta);
         }
       }
     }
@@ -115,16 +150,19 @@ public class IBMModel1 implements WordAligner {
    * @return current convergence score (difference from previous step)
    */
   private double maximize() {
-    // This is the same thing as keeping track of and dividing by source counts
+    // This is the same thing as keeping track of and dividing
+    // by source counts and prior counts respectively
     CounterMap<String, String> t_new = Counters.conditionalNormalize(sourceTargetCounts);
+    CounterMap<List<Integer>, Integer> q_new = Counters.conditionalNormalize(alignmentCounts);
     
     // Evaluate
-    double result = computeSquareDiff(t, t_new);
+    double score_1 = computeSquareDiff(t, t_new);
+    double score_2 = computeSquareDiff(q, q_new);
 
-    // Save
     t = t_new;
+    q = q_new;
 
-    return result;
+    return (score_1+score_2)/2;
   }
 
   /** HELPERS **/
@@ -141,6 +179,11 @@ public class IBMModel1 implements WordAligner {
       for (String value : sourceTargetCounts.getCounter(key).keySet())
         sourceTargetCounts.setCount(key, value, 0.0);
     }
+
+    for (List<Integer> key : alignmentCounts.keySet()) {
+      for (Integer value : alignmentCounts.getCounter(key).keySet())
+        alignmentCounts.setCount(key, value, 0.0);
+    }    
   }
 
   private double computeSquareDiff(CounterMap old, CounterMap newMap) {

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#$ -N hindi_IBMModel2
+#$ -o pa1_results/hindi/IBMModel2_job.out
+#$ -e pa1_results/hindi/IBMModel2_job.error
+#$ -cwd
+#$ -S /bin/bash
+
+	java -cp ~/cs224n/pa1/java/classes cs224n.assignments.WordAlignmentTester   -dataPath /afs/ir/class/cs224n/data/pa1/   -language hindi   -model cs224n.wordaligner.IBMModel2 -evalSet test   -trainSentences 10000
+
+
+	

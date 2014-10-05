@@ -1,0 +1,13 @@
+/// CS224n Word Alignment Tester ///
+Language: hindi
+Data path: /afs/ir/class/cs224n/data/pa1//hindi
+Evaluation set: test
+Using up to 10000 training sentences.
+Training set size: 3441
+Evaluation set size: 90
+Model: cs224n.wordaligner.PMIModel
+
+### Evaluation Results ###
+Precision:	0.2025
+Recall:	0.1611
+AER:	0.8206

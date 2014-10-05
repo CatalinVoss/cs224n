@@ -49,9 +49,10 @@ public class IBMModel2 implements WordAligner {
         
       if (j_max != sources.size() - 1) // skip NULL
         alignment.addPredictedAlignment(i, j_max);
-      else
-        // System.out.println("NULL ASSIGN!");
     }
+
+    // System.out.println (sources);
+    // System.out.println (targets);
     
     return alignment;
   }
