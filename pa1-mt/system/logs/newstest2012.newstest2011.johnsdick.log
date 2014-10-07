@@ -1,0 +1,226 @@
+Number of threads: 8
+Gap type: none
+Phrase table option limit: 20
+Done loading phrase table: /afs/ir.stanford.edu/users/c/a/catalin/cs224n/pa1-mt/system/newstest2012.tables/phrase-table.gz (mem used: 645 MiB time: 4.072 s)
+Longest foreign phrase: 6
+Unknown words policy: Drop
+Language model: /afs/ir/class/cs224n/data/pa1/mt/3gram-lm.gz
+Linear distortion featurizer: edu.stanford.nlp.mt.decoder.feat.base.LinearFutureCostFeaturizer@38556da3
+Reading 65536 1-grams...
+Reading 524288 2-grams...
+Reading 1048576 3-grams...
+Done loading arpa lm: /afs/ir/class/cs224n/data/pa1/mt/3gram-lm.gz (order: 3) (mem used: 500 MiB time: 3.456 s)
+Weights file: newstest2011.johnsdick.online.final.binwts
+WeightConfig: '[TM:FPT.0=0.2146999687916855, LM=0.20710023219563956, TM:FPT.2=0.19545736615459086, TM:FPT.5=0.16897910498530214, COMB:2_2=0.15557479886127878, TM:FPT.3=0.13654034231997364, COMB:2_3=0.12200295249401964, LinearDistortion=0.11681409780051634, COMB:2_5=0.11013633871751125, COMB:4_6=0.09437741839754764, COMB:3_3=0.09317080457520353, TGTD:3=0.08691394218323427, COMB:3_4=0.0847312186300038, TGTD:2=0.08392898591282054, SCTD:2=0.07945065828824675, TGTD:5=0.07701901157259458, SCTD:5=0.07231365534497337, COMB:5_5=0.0709786175809554, COMB:3_6=0.06726755058856417, SCTD:6=0.0629859623659781, TM:FPT.1=0.06268912159541577, SCTD:3=0.05417809602678561, COMB:5_2=0.0481002223488797, COMB:4_4=0.043935838059659164, COMB:4_5=0.03673072995674733, COMB:5_4=0.035545995384481124, SCTD:4=0.031217683146784844, COMB:2_4=0.026112348450537896, COMB:3_5=0.021873101111891932, TM:FPT.4=0.01911996035250949, COMB:3_2=0.018510131093927875, COMB:5_6=0.01684132671759672, COMB:6_5=0.01074049239189109, TGTD:6=0.008957198712583372, COMB:1_3=0.0074814130263364115, COMB:1_2=0.005084223210595105, PhrasePenalty=-0.0015602078654686857, COMB:5_1=-0.0024598530507624703, COMB:6_6=-0.003976040595114708, COMB:5_3=-0.018942749480579342, TGTD:4=-0.01908516657488822, COMB:4_1=-0.027134581987452198, COMB:6_3=-0.027599085427689005, COMB:2_6=-0.029849319763178155, COMB:4_2=-0.03610368150897042, COMB:4_3=-0.03698991015030047, COMB:1_5=-0.043624903600358506, COMB:3_1=-0.04372435498753678, COMB:2_1=-0.06124624310549693, COMB:6_4=-0.06135353682798455, COMB:1_6=-0.06218671237361707, COMB:1_4=-0.06288646135998269, SCTD:1=-0.06849062824605195, COMB:1_1=-0.0706861563388932, TGTD:1=-0.15150664328715735, WordPenalty=-0.31149015472641783]' 
+Search algorithm: cube
+Cube pruning decoder 0. Distortion limit: 5
+Cube pruning decoder 1. Distortion limit: 5
+Cube pruning decoder 2. Distortion limit: 5
+Cube pruning decoder 3. Distortion limit: 5
+Cube pruning decoder 4. Distortion limit: 5
+Cube pruning decoder 5. Distortion limit: 5
+Cube pruning decoder 6. Distortion limit: 5
+Cube pruning decoder 7. Distortion limit: 5
+Inferer Count: 8
+Entering main translation loop
+input 0: 1-best model score: -9.619
+input 1: 1-best model score: -31.108
+input 2: 1-best model score: -33.386
+input 3: 1-best model score: -25.391
+input 4: 1-best model score: -14.619
+input 5: 1-best model score: -28.259
+input 6: 1-best model score: -21.719
+input 7: 1-best model score: -9.391
+input 8: 1-best model score: -6.476
+input 9: 1-best model score: -14.341
+input 10: 1-best model score: -15.774
+input 11: 1-best model score: -5.391
+input 12: 1-best model score: -17.981
+input 13: 1-best model score: -19.709
+input 14: 1-best model score: -20.567
+input 15: 1-best model score: -22.180
+input 16: 1-best model score: -22.680
+input 17: 1-best model score: -22.715
+input 18: 1-best model score: -20.378
+input 19: 1-best model score: -20.768
+input 20: 1-best model score: -26.866
+input 21: 1-best model score: -17.949
+input 22: 1-best model score: -32.845
+input 23: 1-best model score: -16.916
+input 24: 1-best model score: -12.957
+input 25: 1-best model score: -21.604
+input 26: 1-best model score: -14.822
+input 27: 1-best model score: -11.644
+input 28: 1-best model score: -5.290
+input 29: 1-best model score: -7.706
+input 30: 1-best model score: -13.449
+input 31: 1-best model score: -15.632
+input 32: 1-best model score: -11.192
+input 33: 1-best model score: -7.998
+input 34: 1-best model score: -9.889
+input 35: 1-best model score: -23.324
+input 36: 1-best model score: -14.056
+input 37: 1-best model score: -43.590
+input 38: 1-best model score: -6.608
+input 39: 1-best model score: -23.397
+input 40: 1-best model score: -6.606
+input 41: 1-best model score: -3.997
+input 42: 1-best model score: -19.700
+input 43: 1-best model score: -19.871
+input 44: 1-best model score: -21.739
+input 45: 1-best model score: -5.000
+input 46: 1-best model score: -14.512
+input 47: 1-best model score: -15.350
+input 48: 1-best model score: -6.795
+input 49: 1-best model score: -14.929
+input 50: 1-best model score: -15.585
+input 51: 1-best model score: -5.247
+input 52: 1-best model score: -15.442
+input 53: 1-best model score: -12.729
+input 54: 1-best model score: -21.255
+input 55: 1-best model score: -28.924
+input 56: 1-best model score: -13.435
+input 57: 1-best model score: -16.350
+input 58: 1-best model score: -34.109
+input 59: 1-best model score: -21.428
+input 60: 1-best model score: -26.753
+input 61: 1-best model score: -38.744
+input 62: 1-best model score: -12.530
+input 63: 1-best model score: -20.980
+input 64: 1-best model score: -37.048
+input 65: 1-best model score: -7.954
+input 66: 1-best model score: -3.621
+input 67: 1-best model score: -16.608
+input 68: 1-best model score: -19.447
+input 69: 1-best model score: -23.751
+input 70: 1-best model score: -26.731
+input 71: 1-best model score: -16.210
+input 72: 1-best model score: -13.547
+input 73: 1-best model score: -16.359
+input 74: 1-best model score: -23.751
+input 75: 1-best model score: -28.204
+input 76: 1-best model score: -24.740
+input 77: 1-best model score: -19.444
+input 78: 1-best model score: -17.354
+input 79: 1-best model score: -22.781
+input 80: 1-best model score: -22.432
+input 81: 1-best model score: -27.577
+input 82: 1-best model score: -42.925
+input 83: 1-best model score: -7.764
+input 84: 1-best model score: -17.367
+input 85: 1-best model score: -21.301
+input 86: 1-best model score: -20.213
+input 87: 1-best model score: -24.308
+input 88: 1-best model score: -46.460
+input 89: 1-best model score: -10.251
+input 90: 1-best model score: -28.882
+input 91: 1-best model score: -13.817
+input 92: 1-best model score: -13.471
+input 93: 1-best model score: -19.499
+input 94: 1-best model score: -11.298
+input 95: 1-best model score: -18.405
+input 96: 1-best model score: -18.872
+input 97: 1-best model score: -22.470
+input 98: 1-best model score: -11.573
+input 99: 1-best model score: -39.927
+input 100: 1-best model score: -20.148
+input 101: 1-best model score: -14.447
+input 102: 1-best model score: -20.121
+input 103: 1-best model score: -18.469
+input 104: 1-best model score: -22.218
+input 105: 1-best model score: -6.504
+input 106: 1-best model score: -16.713
+input 107: 1-best model score: -47.149
+input 108: 1-best model score: -25.734
+input 109: 1-best model score: -41.794
+input 110: 1-best model score: -13.469
+input 111: 1-best model score: -31.698
+input 112: 1-best model score: -10.800
+input 113: 1-best model score: -20.727
+input 114: 1-best model score: -3.441
+input 115: 1-best model score: -16.312
+input 116: 1-best model score: -16.775
+input 117: 1-best model score: -33.504
+input 118: 1-best model score: -8.372
+input 119: 1-best model score: -25.798
+input 120: 1-best model score: -29.609
+input 121: 1-best model score: -46.152
+input 122: 1-best model score: -37.772
+input 123: 1-best model score: -17.632
+input 124: 1-best model score: -31.073
+input 125: 1-best model score: -35.224
+input 126: 1-best model score: -27.151
+input 127: 1-best model score: -19.762
+input 128: 1-best model score: -11.542
+input 129: 1-best model score: -16.973
+input 130: 1-best model score: -17.892
+input 131: 1-best model score: -49.777
+input 132: 1-best model score: -21.613
+input 133: 1-best model score: -20.312
+input 134: 1-best model score: -12.659
+input 135: 1-best model score: -41.797
+input 136: 1-best model score: -14.034
+input 137: 1-best model score: -7.124
+input 138: 1-best model score: -8.007
+input 139: 1-best model score: -26.466
+input 140: 1-best model score: -16.816
+input 141: 1-best model score: -18.522
+input 142: 1-best model score: -18.225
+input 143: 1-best model score: -7.071
+input 144: 1-best model score: -46.233
+input 145: 1-best model score: -19.764
+input 146: 1-best model score: -9.354
+input 147: 1-best model score: -14.097
+input 148: 1-best model score: -13.235
+input 149: 1-best model score: -30.770
+input 150: 1-best model score: -5.102
+input 151: 1-best model score: -28.958
+input 152: 1-best model score: -36.138
+input 153: 1-best model score: -22.349
+input 154: 1-best model score: -10.143
+input 155: 1-best model score: -20.446
+input 156: 1-best model score: -26.344
+input 157: 1-best model score: -18.684
+input 158: 1-best model score: -30.978
+input 159: 1-best model score: -41.563
+input 160: 1-best model score: -37.436
+input 161: 1-best model score: -38.934
+input 162: 1-best model score: -17.643
+input 163: 1-best model score: -17.682
+input 164: 1-best model score: -34.433
+input 165: 1-best model score: -27.493
+input 166: 1-best model score: -25.564
+input 167: 1-best model score: -19.208
+input 168: 1-best model score: -102.571
+input 169: 1-best model score: -28.940
+input 170: 1-best model score: -26.424
+input 171: 1-best model score: -8.153
+input 172: 1-best model score: -15.649
+input 173: 1-best model score: -9.027
+input 174: 1-best model score: -16.099
+input 175: 1-best model score: -10.953
+input 176: 1-best model score: -11.041
+input 177: 1-best model score: -32.980
+input 178: 1-best model score: -15.335
+input 179: 1-best model score: -4.181
+input 180: 1-best model score: -37.403
+input 181: 1-best model score: -22.017
+input 182: 1-best model score: -18.547
+input 183: 1-best model score: -43.579
+input 184: 1-best model score: -30.735
+input 185: 1-best model score: -17.063
+input 186: 1-best model score: -32.930
+input 187: 1-best model score: -18.254
+input 188: 1-best model score: -4.306
+input 189: 1-best model score: -35.421
+input 190: 1-best model score: -16.805
+input 191: 1-best model score: -6.662
+input 192: 1-best model score: -12.129
+input 193: 1-best model score: -33.097
+input 194: 1-best model score: -20.107
+input 195: 1-best model score: -25.013
+input 196: 1-best model score: -5.764
+input 197: 1-best model score: -27.407
+input 198: 1-best model score: -16.577
+input 199: 1-best model score: -17.986
+Decoding at 4.99 segments/sec (total: 40.07 sec)

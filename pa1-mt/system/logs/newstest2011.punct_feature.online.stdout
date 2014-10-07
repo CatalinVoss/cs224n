@@ -1,0 +1,41 @@
+Phrasal Online Tuner
+Startup: Tue Oct 07 10:35:19 PDT 2014
+====================
+ 	newstest2011.fr /afs/ir/class/cs224n/data/pa1/mt/refs/newstest2011/ref0 newstest2011.punct_feature.ini cs224n.binwts
+ b	20
+ e	4
+ ef	20
+ m	bleu-smooth
+ n	newstest2011.punct_feature
+ o	pro-sgd
+ of	1,5000,50,0.5,Infinity,0.02,adagradl1f,0.1
+ uw	true
+====================
+
+Number of threads: 8
+Gap type: none
+Phrase table option limit: 20
+Done loading phrase table: /afs/ir.stanford.edu/users/c/a/catalin/cs224n/pa1-mt/system/newstest2011.tables/phrase-table.gz (mem used: 645 MiB time: 2.649 s)
+Longest foreign phrase: 6
+Unknown words policy: Drop
+Language model: /afs/ir/class/cs224n/data/pa1/mt/3gram-lm.gz
+Linear distortion featurizer: edu.stanford.nlp.mt.decoder.feat.base.LinearFutureCostFeaturizer@876e4b8
+Reading 65536 1-grams...
+Reading 524288 2-grams...
+Reading 1048576 3-grams...
+Done loading arpa lm: /afs/ir/class/cs224n/data/pa1/mt/3gram-lm.gz (order: 3) (mem used: 464 MiB time: 2.250 s)
+Weights file: cs224n.binwts
+WeightConfig: '[LexR:discontinuous2WithPrevious=0.12944736339373195, TM:FPT.6=0.1189895927163082, LexR:discontinuousWithPrevious=0.08224163607787623, LexR:monotoneWithPrevious=0.07781759585017375, LexR:swapWithPrevious=0.07320729449012583, LexR:monotoneWithNext=0.05043513664498748, LexR:discontinuous2WithNext=0.04554145056121328, LM=0.042100720916833895, TM:FPT.2=0.025813070498999214, TM:FPT.1=0.025588606344493135, LexR:swapWithNext=0.022265366957531625, LexR:discontinuousWithNext=0.02103066236194083, TM:FPT.3=0.018935261391686522, TM:FPT.0=0.011388875543155284, TM:FPT.5=0.010870643292902507, LinearDistortion=0.010108551791847125, UnknownWord=-4.0082737272793465E-4, TM:FPT.4=-0.09249497813263272, WordPenalty=-0.1380546813346322]' 
+Search algorithm: cube
+Cube pruning decoder 0. Distortion limit: 5
+Cube pruning decoder 1. Distortion limit: 5
+Cube pruning decoder 2. Distortion limit: 5
+Cube pruning decoder 3. Distortion limit: 5
+Cube pruning decoder 4. Distortion limit: 5
+Cube pruning decoder 5. Distortion limit: 5
+Cube pruning decoder 6. Distortion limit: 5
+Cube pruning decoder 7. Distortion limit: 5
+Inferer Count: 8
+Generating n-best lists (size: 100)
+Elapsed time: 86.97 seconds
+Finished at: Tue Oct 07 10:36:46 PDT 2014

@@ -1,0 +1,17 @@
+Phrasal Online Tuner
+Startup: Tue Oct 07 01:44:02 PDT 2014
+====================
+ 	newstest2011.fr /afs/ir/class/cs224n/data/pa1/mt/refs/newstest2011/ref0 newstest2011.theawesome.ini cs224n.binwts
+ b	20
+ e	4
+ ef	20
+ m	bleu-smooth
+ n	newstest2011.theawesome
+ o	pro-sgd
+ of	1,5000,50,0.5,Infinity,0.02,adagradl1f,0.1
+ uw	true
+====================
+
+Number of threads: 8
+Gap type: none
+Phrase table option limit: 20

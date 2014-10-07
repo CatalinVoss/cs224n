@@ -1,2 +1,7 @@
-15.321 newstest2011.baseline
-15.000 newstest2011.cs224n-staff
+15.579 newstest2011.punct_feature
+15.554 newstest2011.punct_feature
+15.495 newstest2011.punct_feature
+15.485 newstest2011.punct_feature
+15.440 newstest2011.punct_feature
+15.401 newstest2011.punct_feature
+15.164 newstest2011.punct_feature
