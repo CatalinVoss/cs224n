@@ -1,6 +1,0 @@
-Oct 06, 2014 11:15:42 PM edu.stanford.nlp.mt.tune.OnlineTuner <init>
-INFO: Initial weights: {LexR:monotoneWithPrevious=0.2, LexR:swapWithNext=0.2, LinearDistortion=0.2, TM:FPT.0=0.2, LM=0.5, LexR:discontinuous2WithNext=0.2, TM:FPT.3=0.2, TM:FPT.4=0.2, TM:FPT.1=0.2, LexR:discontinuous2WithPrevious=0.2, TM:FPT.2=0.2, LexR:discontinuousWithPrevious=0.2, TM:FPT.6=0.2, PhrasePenalty=0.2, TM:FPT.5=0.2, WordPenalty=-1.0, LexR:swapWithPrevious=0.2, LexR:monotoneWithNext=0.2, LexR:discontinuousWithNext=0.2, UnknownWord=0.2}
-Oct 06, 2014 11:15:42 PM edu.stanford.nlp.mt.tune.OnlineTuner loadReferences
-INFO: Number of references for objective function calculation: 1
-Oct 06, 2014 11:15:42 PM edu.stanford.nlp.mt.tune.OnlineTuner <init>
-INFO: Intrinsic loss corpus contains 200 examples
