@@ -15,20 +15,42 @@ import cs224n.util.Filter;
  * scoring.
  */
 public class TreeAnnotations {
-
 	public static Tree<String> annotateTree(Tree<String> unAnnotatedTree) {
-
-		// Currently, the only annotation done is a lossless binarization
-
 		// TODO: change the annotation from a lossless binarization to a
 		// finite-order markov process (try at least 1st and 2nd order)
 
-		// TODO : mark nodes with the label of their parent nodes, giving a second
-		// order vertical markov process
-
-		return binarizeTree(unAnnotatedTree);
-
+		// Mark nodes with the label of their parent nodes, giving a second order vertical markov process
+    markovize(unAnnotatedTree, new ArrayList<String>(), 2);
+    // System.out.println("Markovized: "+unAnnotatedTree.toString());
+    return binarizeTree(unAnnotatedTree);
 	}
+
+	// Recursively vertically markovize the tree. There's no magic to this. Starting at the top we recurse to the bottom.
+  // If we had just order 1: We wouldn't change parent labels until we processed all children, this should be bottom up.
+  // However, for any order, we need to keep the last n parents.
+  private static void markovize(Tree<String> tree, ArrayList<String> parents, int order) {
+    // Don't do anything to the original words
+    if (tree.isLeaf())
+      { return; } // tree.getLabel()
+
+    String tag = tree.getLabel();
+    for (String parent : parents)
+      tag += "^" + parent;
+
+    ArrayList<String> newParents = new ArrayList<String>(parents);
+
+    newParents.add(tree.getLabel());
+    if (newParents.size() > order)
+      newParents.remove(0);
+
+    // Recursively process children
+    // This will make sure we start at the bottom technically
+    for (Tree<String> child : tree.getChildren())
+      markovize(child, newParents, order); 
+
+    // Finally set the label
+    tree.setLabel(tag);
+  }
 
 	private static Tree<String> binarizeTree(Tree<String> tree) {
 		String label = tree.getLabel();
