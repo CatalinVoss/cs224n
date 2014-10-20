@@ -1,0 +1,101 @@
+_________________SETUP INSTRUCTIONS____________
+cd 
+mkdir -p cs224n
+cd cs224n
+cp -r /afs/ir/class/cs224n/pa-cgw .
+cd pa-cgw
+bash
+export PATH=$PATH:~/cs224n/pa-cgw
+
+The path variable would need to be reset every time you log into myth/corn. 
+For csh users:
+setenv PATH ${PATH}:~/cs224n/pa-cgw
+
+__________________GRAMMAR SYNTAX_______________
+
+Rules are written in the following format:
+
+WEIGHT  RULE
+
+Rules are written with the left and right hand sides separated by "->"
+For example:
+
+1 S -> NP VP
+
+Anything written inside parentheses is considered optional. This is equivalent to the '?' operator in regex
+
+For Example, the two rules S -> NP VP and S -> NP can be concisely written as 
+
+S -> NP (VP)
+
+To indicate an 'or' relationship, use curly brackets with the pipe symbol as delimiter. For example:
+
+S -> {NP VP | NP }. This expands to
+
+S -> NP VP 
+S -> NP
+
+
+'e' is the special symbol that indicates null string. To indicate that sentences can sometimes be blank, you can create the following rule:
+
+S -> e
+
+_______________HOW TO GET STARTED_____________
+
+The first thing you will probably want to do is add some more part of speech categories by splitting up the 'Misc' category in Vocab.gr.  For example, you might put in an 'Adj' category.  Once you have a new part of speech, you'll want to add one or more rules to the S1 grammar which uses it.  But, *importantly* you'll also want to add it to the back-off S2 grammar.  Just add it to the disjunction in the Markov rule and the S2 grammar will remain able to generate any sequence of nonterminals.
+
+please also read the comments in each of these files:
+
+S1.gr
+S2.gr (Back-off grammar)
+Vocab.gr
+
+If you are working in teams, your partner(s) can add rules in a new file. The script considers any file in the pa-cgw directory that ends in  '.gr' as a part of your grammar.
+
+____________________COMMANDS____________________
+
+(1) To generate sentences from the grammar you currently have:
+./cs224n-generate.sh -n 20 -t 
+
+Options: -t -> Print the parse tree
+         -n -> Number of sentences to be generated
+		 -s -> In case you want to use a separate start symbol (to test a part of the grammar). The default is START
+
+Pipe the output to prettyprint to see a nice view of the parse (as nice as we could do, right now)
+
+./cs224n-generate.sh -n 20 -t | prettyprint
+
+
+(2) To Parse the set of sentences in the dev set using your grammar and calculate cross-entropy:
+
+./cs224n-parse.sh -i dev.sen -C
+
+Options: -i -> Input sentence file, one sentence per line
+ 		 -C -> To Calculate cross entropy
+		 -n -> To suppress tree output, in case you just want to see the entropy value
+		 -s -> In case you want to use a separate start symbol (to test a part of the grammar). The default is START
+
+Again, you can pipe the output to prettyprint:
+
+./cs224n-parse.sh -i dev.sen | prettyprint
+
+(3) To make sure your grammar isn't generating new terms not in the vocabulary. This will come in handly when you introduce a new non-terminal symbol and forget to write its expansion rule. 
+
+./cs224n-check.sh
+
+This script internally calls the binary 'check-for-new-terms'. Note that this binary is called automatically whenever you make a call 'cs224n-generate.sh' or 'cs224n-parse.sh'
+Also, note that this will not check for grammars that generate infinitely long sentences
+
+________________ERRORS___________________________
+
+"Invalid Syntax" / "Parse Exception"
+
+Your grammar syntax is invalid. Check the error message for the file and line at which the syntax is invalid. If you think the error message is invalid, you may have found a bug with our parsing code. Submit a bug report.
+
+________________SUBMIT__________________________
+/afs/ir/class/cs224n/bin/submit
+
+Follow the instructions thereon
+
+________________MORE READING____________________
+Take a look at index.html for a more detailed description of the task. However, please don't use the commands given in the html file
