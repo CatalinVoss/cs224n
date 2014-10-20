@@ -1,0 +1,109 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{url}
+\begin{document}
+\thispagestyle{empty}
+\parindent 0pt
+\vfill
+\large
+
+\begin{center}
+\title{CS 224N}
+\LARGE{\bf {CS 224N: Competitive Grammar Writing}} \\*[4ex]
+\end{center}
+
+\section{SETUP INSTRUCTIONS:}
+
+Log into your home directory in corn/myth. \\ \\
+cd \\
+mkdir -p cs224n \\
+cd cs224n \\
+cp -r /afs/ir/class/cs224n/pa-cgw . \\
+cd pa-cgw \\
+bash \\
+export PATH=\$PATH:$\sim$/cs224n/pa-cgw \\
+\\
+The path variable would need to be reset every time you log into myth/corn. \\ 
+\\
+For csh users: \\
+setenv PATH \${PATH}:$\sim$/cs224n/pa-cgw
+
+\section{INTRODUCTION:}
+The competitive grammar writing exercise is meant to be an introduction to hand-written context free grammars. In this exercise you will write grammar rules and manually assign weights to these rules. Using your grammar you will be able to generate sentences from a fixed vocabulary and parse sentences containing words from this vocabulary. \\ \\
+The S1 grammar is where you add the rules for your grammar. This grammar should ideally be able to parse and assign non-zero probabilities to all syntactically correct English sentences that can be generated from our vocabulary. The S2 grammar should be able to assign some small probability mass to all possible word strings possible from our vocabulary. If you could design S1 perfectly, then you wouldn't need S2. But English is amazingly complicated, and you only have a few hours. So S2 will serve as your fallback grammar. It will be able to handle any English sentences that S1 can't. \\ \\
+One way to see what your grammar does is to generate random sentences from it. For our purposes, generation is just repeated symbol expansion. To expand a symbol such as NP, our sentence generator will randomly choose one of your grammar's NP \begin{math} \rightarrow \end{math} ... rules, with probability proportional to the rule's weight.\\ \\
+Your task is to write the grammar rules and also choose the weight for each rule. The weights allow you to express your knowledge of which English phenomena are common and which ones are rare. By giving a low weight to a rule (or to S2 itself), you express a belief that it doesn't happen very often in English. \\ \\
+Another way to see what your grammar does is to parse sentences with it. You can use our parser to look at a sentence and figure out whether your grammar could have generated it -- and how, and with what probability. We say that your grammar predicts a sentence well if (according to the parser) your grammar has a comparatively high probability of generating exactly that sentence. \\ \\
+You will have to decide how much effort to expend on designing S1 and S2, and how much you will trust S1 relative to S2. Your goal is to describe English accurately. This means that your grammar (especially the S1 subgrammar) should be able to generate lots of syntactic constructions that show up in English. Moreover, it should have a higher probability of generating common sentences, and a low or zero probability of generating ungrammatical sentences. \\
+The goal of this exercise is to build a grammar that produces only grammatically correct sentences. For example, it shouldn’t accept `a man run' or `the man honest'.  Because in English you need to say `a man is running' (or `a man runs') or `the man is honest' However, your grammar should accept grammatically correct but semantically ridiculous sentences, such as `the castle drinks temperate coconuts that have successfully carried Arthur'. (Note that we don’t worry about sentence-initial capitalization.) 
+\section{GRAMMAR SYNTAX:}
+Rules are written in the following format: \\ \\
+WEIGHT \quad RULE \\ \\
+Rules are written with the left and right hand sides separated by "-\textgreater" \\
+For example: \\ \\
+1 S -\textgreater NP VP \\ \\
+Anything written inside parentheses is considered optional. This is equivalent to the '?' operator in regex \\
+For Example, the two rules S -\textgreater NP VP and S -\textgreater NP can be concisely written as \\ \\ 
+S -\textgreater NP (VP) \\ \\
+To indicate an 'or' relationship, use curly brackets with the pipe symbol as delimiter. For example: \\ \\ 
+S -\textgreater $\{$ NP VP $\mid$ NP $\}$. This expands to \\ \\
+S -\textgreater NP VP \\ 
+S -\textgreater NP \\ \\
+'e' is the special symbol that indicates null string. To indicate that sentences can sometimes be blank, you can create the following rule: \\ \\ 
+S -\textgreater e
+
+\section{GETTING STARTED:}
+The first thing you will probably want to do is add some more part of speech categories by splitting up the 'Misc' category in Vocab.gr.  For example, you might put in an 'Adj' category.  Once you have a new part of speech, you'll want to add one or more rules to the S1 grammar which uses it.  But, *importantly* you'll also want to add it to the back-off S2 grammar.  Just add it to the disjunction in the Markov rule and the S2 grammar will remain able to generate any sequence of nonterminals. Since we are working with a fixed vocabulary, you should not change the terminal vocabulary of the system.\\ \\
+Don't forget to read the comments in each of these files:\\
+S1.gr \\
+S2.gr (Back-off grammar) \\
+Vocab.gr \\
+
+If you are working in teams, your partner(s) can add rules in a new file. The script considers any file in the pa-cgw directory that ends in  '.gr' as a part of your grammar. This might be a more efficient way to work in teams on this exercise.
+
+\section{COMMANDS:}
+\begin{enumerate}
+\item To generate sentences from the grammar you currently have: \\
+./cs224n-generate.sh -n 20 -t \\ 
+
+Options: \begin{itemize}
+\item t $\rightarrow$ Print the parse tree 
+        \item -n $\rightarrow$ Number of sentences to be generated 
+		 \item -s $\rightarrow$ In case you want to use a separate start symbol (to test a part of the grammar). The default is START.
+\end{itemize}
+Pipe the output to prettyprint to see a nice view of the parse (as nice as we could do, right now) \\
+./cs224n-generate.sh -n 20 -t $\mid$ prettyprint
+
+\item  To Parse the set of sentences in the dev set using your grammar and calculate cross-entropy: \\
+./cs224n-parse.sh -i dev.sen -C \\
+
+Options: \begin{itemize} \item -i $\rightarrow$ Input sentence file, one sentence per line
+ 		 \item -C $\rightarrow$ To Calculate cross entropy
+		 \item -n $\rightarrow$ To suppress tree output, in case you just want to see the entropy value
+		 \item -s $\rightarrow$ In case you want to use a separate start symbol (to test a part of the grammar). The default is START
+\end{itemize}
+Again, you can pipe the output to prettyprint:\\
+./cs224n-parse.sh -i dev.sen | prettyprint
+
+\item  To make sure your grammar isn't generating new terms not in the vocabulary. This will come in handly when you introduce a new non-terminal symbol and forget to write its expansion rule. \\
+./cs224n-check.sh \\
+This script internally calls the binary 'check-for-new-terms'. Note that this binary is called automatically whenever you make a call 'cs224n-generate.sh' or 'cs224n-parse.sh' \\
+Also, note that this will not check for grammars that generate infinitely long sentences
+\end{enumerate}
+
+\section{EVALUATION:}
+The performance of your system will be measured in two ways:
+\begin{enumerate}
+\item As a simple test, we will randomly generate sentences according to your S1 model, and see how many of them are grammatical. To do well on this score, your S1 should be restrictive enough to generate "real" English sentences only.
+\item For the real test, we will see how well your grammar predicts the output of the other teams' grammars (i.e., their randomly generated S1 sentences, excluding any ungrammatical ones). Really we should see how well your grammar predicts some naturally occurring English, like tomorrow's newspaper, but it's more fun to pit the teams against one another. The cross entropy (log perplexity) is a measure of whether the grammar gives high or low probability to the dev set sample of sentences. A smaller number is better.\\ \\
+To do well on the second score, you need to guess what the other teams are doing and keep up with them. Your grammar must be able to generate their sentences, and indeed do so with high probability. In practice you want your S1 to generate their sentences; although your fallback grammar S2 can generate all possible strings, it consequently has low probability of generating any particular string. So you will try to make S1 extensive enough to handle anything that the other teams can throw at you -- and extensive enough that you are throwing tricky sentences back at the other teams! 
+
+
+\section{SUBMISSION:}
+Go to \\
+/afs/ir/class/cs224n/bin/submit \\
+and follow the instructions.
+
+\end{enumerate}
+
+\end{document}

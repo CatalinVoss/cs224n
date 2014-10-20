@@ -1,0 +1,5 @@
+1 S2 -> Markov
+
+# Add to the disjunction below any new POS tag that you might introduce in Vocab.gr. 
+#This ensures that your grammar retains the ability to parse any given sequence of POS tags
+1 Markov -> {per | exclam | posspn | plnoun| Det | Misc | Noun | Prep | Proper | VerbT | Adj | CConj | pause | eos | qmark | wh | pp | Modal | BaseVerb | PresPart | PastPart | Verb3 | n | t | PropNoun | i | d} (Markov) 

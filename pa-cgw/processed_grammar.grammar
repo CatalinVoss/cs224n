@@ -1,0 +1,334 @@
+1.0	qmark	?
+1.0	S2	Markov
+20.0	S1	NP	VP	eos
+5.0	S1	NP	VP	pause	CConj	NP	VP	eos
+0.166666666667	S1	wh	d	NP	VP	qmark
+0.166666666667	S1	d	NP	VP	qmark
+0.166666666667	S1	wh	NP	VP	qmark
+0.166666666667	S1	wh	d	VP	NP	VP	qmark
+0.166666666667	S1	d	VP	NP	VP	qmark
+0.166666666667	S1	wh	VP	NP	VP	qmark
+1.0	CConj	and
+1.0	CConj	but
+1.0	CConj	or
+1.0	CConj	either
+1.0	CConj	nor
+1.0	CConj	neither
+1.0	CConj	so
+1.0	posspn	her
+1.0	posspn	his
+1.0	posspn	its
+1.0	posspn	their
+1.0	Adj	bloody
+1.0	Adj	weary
+1.0	Adj	unable
+1.0	Adj	trusty
+1.0	Adj	further
+1.0	Adj	sacred
+1.0	Adj	tropical
+1.0	Adj	indigenous
+1.0	Adj	temperate
+1.0	Adj	hot
+1.0	Adj	lucky
+1.0	Adj	simple
+1.0	Adj	tiny
+1.0	Adj	hard
+1.0	Adj	sensational
+1.0	Adj	comparable
+1.0	Adj	angolian
+1.0	Adj	yellow
+1.0	Adj	plodding
+1.0	Prep	above
+1.0	Prep	across
+1.0	Prep	at
+1.0	Prep	below
+1.0	Prep	by
+1.0	Prep	for
+1.0	Prep	from
+1.0	Prep	into
+1.0	Prep	near
+1.0	Prep	of
+1.0	Prep	on
+1.0	Prep	over
+1.0	Prep	through
+1.0	Prep	with
+1.0	Prep	to
+1.0	PP	Prep	NP
+1.0	pause	,
+1.0	pause	...
+1.0	pause	--
+1.0	pause	;
+1.0	pause	:
+1.0	plnoun	coconuts
+1.0	plnoun	halves
+1.0	plnoun	snows
+1.0	plnoun	mountains
+1.0	plnoun	areas
+1.0	plnoun	strangers
+1.0	plnoun	inches
+1.0	plnoun	snakes
+1.0	plnoun	ants
+1.0	plnoun	nights
+1.0	per	.
+50.0	Verb	Verb3
+50.0	Verb	VerbT
+1.0	VerbT	has
+1.0	VerbT	covers
+1.0	VerbT	is
+1.0	VerbT	drinks
+1.0	VerbT	carries
+1.0	VerbT	rides
+1.0	PresPart	having
+1.0	PresPart	speaking
+1.0	PresPart	covering
+1.0	PresPart	being
+1.0	PresPart	riding
+1.0	PresPart	drinking
+1.0	PresPart	growing
+1.0	PresPart	carrying
+1.0	PresPart	suggesting
+1.0	PresPart	migrating
+1.0	PresPart	knowing
+0.5	NP	PresPart
+0.5	NP	PresPart	PP
+5.0	NP	posspn	Nbar
+5.0	NP	Det	Nbar
+5.0	NP	posspn	Adj	Nbar
+5.0	NP	Det	Adj	Nbar
+0.5	NP	plnoun
+0.5	NP	Proper
+0.047619047619	Noun	story
+0.047619047619	Noun	weight
+0.047619047619	Noun	home
+0.047619047619	Noun	husk
+0.047619047619	Noun	pound
+0.047619047619	Noun	coconut
+0.047619047619	Noun	winter
+0.047619047619	Noun	sun
+0.047619047619	Noun	swallow
+0.047619047619	Noun	fruit
+0.047619047619	Noun	horse
+0.047619047619	Noun	master
+0.047619047619	Noun	chalice
+0.047619047619	Noun	quest
+0.047619047619	Noun	land
+0.047619047619	Noun	corner
+0.047619047619	Noun	servant
+0.047619047619	Noun	sovereign
+0.047619047619	Noun	defeater
+0.047619047619	Noun	king
+0.047619047619	Noun	castle
+1.0	PastPart	had
+1.0	PastPart	spoken
+1.0	PastPart	covered
+1.0	PastPart	been
+1.0	PastPart	ridden
+1.0	PastPart	drunk
+1.0	PastPart	grown
+1.0	PastPart	carried
+1.0	PastPart	suggested
+1.0	PastPart	migrated
+1.0	PastPart	known
+0.111111111111	Det	this
+0.111111111111	Det	the
+0.111111111111	Det	that
+0.111111111111	Det	no
+0.111111111111	Det	every
+0.111111111111	Det	each
+0.111111111111	Det	any
+0.111111111111	Det	another
+0.111111111111	Det	a
+1.0	pp	he
+1.0	pp	her
+1.0	pp	him
+1.0	pp	it
+1.0	pp	one
+1.0	pp	she
+1.0	pp	them
+1.0	pp	they
+1.0	wh	that
+1.0	wh	what
+1.0	wh	which
+1.0	wh	what
+1.0	wh	who
+1.0	wh	whose
+1.0	wh	how
+1.0	wh	when
+1.0	wh	where
+1.0	wh	why
+10.0	VP	Verb	NP
+0.25	VP	BaseVerb
+0.25	VP	Modal	BaseVerb
+0.25	VP	BaseVerb	NP
+0.25	VP	Modal	BaseVerb	NP
+1.0	VP	Verb3
+0.5	VP	Verb
+0.5	VP	Verb	NP
+1.0	VP	i	Adj
+1.0	VP	Verb	t	NP
+60.0	START	S1
+40.0	START	S2
+1.0	BaseVerb	have
+1.0	BaseVerb	speak
+1.0	BaseVerb	cover
+1.0	BaseVerb	be
+1.0	BaseVerb	ride
+1.0	BaseVerb	drink
+1.0	BaseVerb	grow
+1.0	BaseVerb	carry
+1.0	BaseVerb	suggest
+1.0	BaseVerb	migrate
+1.0	BaseVerb	know
+1.0	Modal	can
+1.0	Modal	could
+1.0	Modal	may
+1.0	Modal	might
+1.0	Modal	must
+1.0	Modal	ought
+1.0	Modal	shall
+1.0	Modal	should
+1.0	Modal	will
+1.0	Modal	would
+1.0	exclam	!
+0.0185185185185	Markov	d
+0.0185185185185	Markov	i
+0.0185185185185	Markov	PropNoun
+0.0185185185185	Markov	t
+0.0185185185185	Markov	n
+0.0185185185185	Markov	Verb3
+0.0185185185185	Markov	PastPart
+0.0185185185185	Markov	PresPart
+0.0185185185185	Markov	BaseVerb
+0.0185185185185	Markov	Modal
+0.0185185185185	Markov	pp
+0.0185185185185	Markov	wh
+0.0185185185185	Markov	qmark
+0.0185185185185	Markov	eos
+0.0185185185185	Markov	pause
+0.0185185185185	Markov	CConj
+0.0185185185185	Markov	Adj
+0.0185185185185	Markov	VerbT
+0.0185185185185	Markov	Proper
+0.0185185185185	Markov	Prep
+0.0185185185185	Markov	Noun
+0.0185185185185	Markov	Misc
+0.0185185185185	Markov	Det
+0.0185185185185	Markov	plnoun
+0.0185185185185	Markov	posspn
+0.0185185185185	Markov	exclam
+0.0185185185185	Markov	per
+0.0185185185185	Markov	d	Markov
+0.0185185185185	Markov	i	Markov
+0.0185185185185	Markov	PropNoun	Markov
+0.0185185185185	Markov	t	Markov
+0.0185185185185	Markov	n	Markov
+0.0185185185185	Markov	Verb3	Markov
+0.0185185185185	Markov	PastPart	Markov
+0.0185185185185	Markov	PresPart	Markov
+0.0185185185185	Markov	BaseVerb	Markov
+0.0185185185185	Markov	Modal	Markov
+0.0185185185185	Markov	pp	Markov
+0.0185185185185	Markov	wh	Markov
+0.0185185185185	Markov	qmark	Markov
+0.0185185185185	Markov	eos	Markov
+0.0185185185185	Markov	pause	Markov
+0.0185185185185	Markov	CConj	Markov
+0.0185185185185	Markov	Adj	Markov
+0.0185185185185	Markov	VerbT	Markov
+0.0185185185185	Markov	Proper	Markov
+0.0185185185185	Markov	Prep	Markov
+0.0185185185185	Markov	Noun	Markov
+0.0185185185185	Markov	Misc	Markov
+0.0185185185185	Markov	Det	Markov
+0.0185185185185	Markov	plnoun	Markov
+0.0185185185185	Markov	posspn	Markov
+0.0185185185185	Markov	exclam	Markov
+0.0185185185185	Markov	per	Markov
+20.0	Nbar	Noun
+1.0	Nbar	Nbar	PP
+1.0	d	do
+1.0	d	does
+1.0	i	is
+0.166666666667	Misc	5,000
+0.166666666667	Misc	sixty
+0.166666666667	Misc	5.5
+0.166666666667	Misc	one
+0.166666666667	Misc	five
+0.166666666667	Misc	eight
+1.0	Misc	there
+0.2	Misc	if
+0.2	Misc	because
+0.2	Misc	while
+0.2	Misc	so
+0.2	Misc	that
+1.0	Misc	bloodier
+1.0	Misc	wearier
+1.0	Misc	trustier
+1.0	Misc	hotter
+1.0	Misc	simpler
+1.0	Misc	tinier
+1.0	Misc	harder
+1.0	Misc	bloodiest
+1.0	Misc	weariest
+1.0	Misc	trustiest
+1.0	Misc	hottest
+1.0	Misc	simplest
+1.0	Misc	tiniest
+1.0	Misc	hardest
+1.0	Misc	Britons
+1.0	Misc	Saxons
+1.0	Misc	again
+1.0	Misc	already
+1.0	Misc	currently
+1.0	Misc	frequently
+1.0	Misc	precisely
+1.0	Misc	south
+1.0	Misc	successfully
+1.0	Misc	unfortunately
+1.0	Misc	had
+1.0	Misc	spoke
+1.0	Misc	covered
+1.0	Misc	was
+1.0	Misc	were
+1.0	Misc	rode
+1.0	Misc	drank
+1.0	Misc	grew
+1.0	Misc	carried
+1.0	Misc	suggested
+1.0	Misc	migrated
+1.0	Misc	knew
+1.0	Misc	have
+1.0	Misc	speak
+1.0	Misc	cover
+1.0	Misc	are
+1.0	Misc	ride
+1.0	Misc	drink
+1.0	Misc	grow
+1.0	Misc	carry
+1.0	Misc	suggest
+1.0	Misc	migrate
+1.0	Misc	know
+1.0	Misc	's
+1.0	n	not
+20.0	eos	per
+2.0	eos	exclam
+1.0	eos	qmark
+1.0	Verb3	speaks
+1.0	Verb3	grows
+1.0	Verb3	goes
+1.0	Verb3	migrates
+1.0	Verb3	suggests
+1.0	Verb3	knows
+1.0	t	to
+0.125	Proper	Uther	Pendragon
+0.125	Proper	Patsy
+0.125	Proper	Dingo
+0.125	Proper	Zoot
+0.125	Proper	Sir	Bedevere
+0.125	Proper	Sir	Lancelot
+0.125	Proper	Guinevere
+0.125	Proper	Arthur
+1.0	Proper	Camelot
+1.0	Proper	England
+1.0	Proper	Holy	Grail
+1.0	Proper	Round	Table

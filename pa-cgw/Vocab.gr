@@ -1,0 +1,287 @@
+# This is a hand-generated set of preterminal rules.
+# It specifies a simple tag set which will be handled by the S2
+# grammar and which can (though doesn't necessarily need to be)
+# handled by the S1 grammar.
+#
+# The weights given here may be changed, but no new vocabulary
+# items are to be added.
+
+# Miscellaneous items that don't fit into any of our simple tags are
+# given to Misc.  You will want to develop your own tags for these!
+
+# Singular and mass nouns.  Notice that only the
+# ones that start with consonants get our Noun tag.
+1	Noun ->	{castle | king | defeater | sovereign | servant | corner | land | quest | chalice | master | horse | fruit | swallow | sun | winter | coconut | pound | husk | home | weight | story}
+
+# Determiners.
+1	Det	 -> {a | another | any | each | every | no | that | the | this}
+
+# Prepositions.
+1	Prep -> above
+1	Prep ->	across
+1	Prep ->	at
+1	Prep ->	below
+1	Prep ->	by
+1	Prep ->	for
+1	Prep ->	from
+1	Prep ->	into
+1	Prep ->	near
+1	Prep ->	of
+1	Prep ->	on
+1	Prep ->	over
+1	Prep ->	through
+1	Prep ->	with
+1	Prep -> to
+
+# Proper nouns.  Note that our Proper tag is just for people.
+1	Proper -> {Arthur | Guinevere | Sir Lancelot | Sir Bedevere | Zoot | Dingo | Patsy | Uther Pendragon}
+
+# Verbs (third person singular present).
+# Note that only transitive verbs get our VerbT tag,
+# and some of those could also function as intransitives!
+1	VerbT -> has
+1	VerbT -> covers
+1	VerbT -> is
+1	VerbT -> drinks
+1	VerbT -> carries
+1	VerbT -> rides
+
+# special.
+1	i -> is
+
+# End-of-sentence.
+1	exclam ->	!
+1	per ->	.
+1	qmark ->	?
+
+# Pauses.
+1	pause ->	,
+1	pause ->	...
+1	pause ->	--
+1	pause ->	;
+1	pause ->	:
+
+# Coordinating conjunctions.
+1	CConj ->	and
+1	CConj ->	but
+1	CConj ->	or
+1	CConj ->	either
+1	CConj ->	nor
+1	CConj ->	neither
+1	CConj ->	so
+
+# Numbers.
+1	Misc -> {eight | five | one | 5.5 | sixty | 5,000}
+
+# Expletive.
+1	Misc -> there
+
+# Subordinating conjunctions.
+1	Misc -> {that | so | while | because | if}
+
+# Modals.
+1	Modal -> can
+1	Modal ->	could
+1	Modal ->	may
+1	Modal ->	might
+1	Modal ->	must
+1	Modal ->	ought
+1	Modal ->	shall
+1	Modal ->	should
+1	Modal ->	will
+1	Modal ->	would
+
+
+# Adjectives.
+1	Adj ->	bloody
+1	Adj ->	weary
+1	Adj ->	unable
+1	Adj ->	trusty
+1	Adj ->	further
+1	Adj ->	sacred
+1	Adj ->	tropical
+1	Adj ->	indigenous
+1	Adj ->	temperate
+1	Adj ->	hot
+1	Adj ->	lucky
+1	Adj ->	simple
+1	Adj ->	tiny
+1	Adj ->	hard	
+1	Adj ->	sensational
+1	Adj ->	comparable
+1	Adj ->	angolian
+1	Adj ->	yellow
+1	Adj ->	plodding
+
+# Comparative adjectives.
+1	Misc ->	bloodier
+1	Misc ->	wearier
+1	Misc ->	trustier
+1	Misc ->	hotter
+1	Misc ->	simpler
+1	Misc ->	tinier
+1	Misc ->	harder
+
+# Superlative adjectives.
+1	Misc ->	bloodiest
+1	Misc ->	weariest
+1	Misc ->	trustiest
+1	Misc ->	hottest
+1	Misc ->	simplest
+1	Misc ->	tiniest
+1	Misc ->	hardest
+
+# Plural nouns.
+1	plnoun ->	coconuts
+1	plnoun ->	halves
+1	plnoun ->	snows
+1	plnoun ->	mountains
+1	plnoun ->	areas
+1	plnoun ->	strangers
+1	plnoun ->	inches
+1	plnoun ->	snakes
+1	plnoun ->	ants
+1	plnoun ->	nights
+
+# More proper nouns, not people.
+
+1	Proper ->	Camelot
+1	Proper ->	England
+1	Proper ->	Holy Grail
+1	Proper ->	Round Table
+
+# Plural proper nouns.
+1	Misc ->	Britons
+1	Misc ->	Saxons
+
+# Personal pronouns.
+1	pp ->	he
+1	pp ->	her
+1	pp ->	him
+1	pp ->	it
+1	pp ->	one
+1	pp ->	she
+1	pp ->	them
+1	pp ->	they
+
+# Possessive personal pronouns
+1	posspn ->	her
+1	posspn ->	his
+1	posspn ->	its
+1	posspn ->	their
+
+# Adverbs.
+1	Misc ->	again
+1	Misc ->	already
+1	Misc ->	currently
+1	Misc ->	frequently
+1	Misc ->	precisely
+1	Misc ->	south
+1	Misc ->	successfully
+1	Misc ->	unfortunately
+
+# 'do'/'does'
+1	d ->	do
+1	d ->	does
+
+# 'to'
+1	t ->	to
+
+# 'not'
+1	n ->	not
+
+# Verbs (base form).
+1	BaseVerb ->	have
+1	BaseVerb ->	speak
+1	BaseVerb ->	cover
+1	BaseVerb ->	be
+1	BaseVerb ->	ride
+1	BaseVerb ->	drink
+1	BaseVerb ->	grow
+1	BaseVerb ->	carry
+1	BaseVerb ->	suggest
+1	BaseVerb ->	migrate
+1	BaseVerb ->	know
+
+# Verbs (past tense).
+1	Misc ->	had
+1	Misc ->	spoke
+1	Misc ->	covered
+1	Misc ->	was
+1	Misc ->	were
+1	Misc ->	rode
+1	Misc ->	drank
+1	Misc ->	grew
+1	Misc ->	carried
+1	Misc ->	suggested
+1	Misc ->	migrated
+1	Misc ->	knew
+
+# Verbs (present participles).
+1	PresPart ->	having
+1	PresPart ->	speaking
+1	PresPart ->	covering
+1	PresPart ->	being
+1	PresPart ->	riding
+1	PresPart ->	drinking
+1	PresPart ->	growing
+1	PresPart ->	carrying
+1	PresPart ->	suggesting
+1	PresPart ->	migrating
+1	PresPart ->	knowing
+
+# Verbs (past participle).
+1	PastPart ->	had
+1	PastPart ->	spoken
+1	PastPart ->	covered
+1	PastPart ->	been
+1	PastPart ->	ridden
+1	PastPart ->	drunk
+1	PastPart ->	grown
+1	PastPart ->	carried
+1	PastPart ->	suggested
+1	PastPart ->	migrated
+1	PastPart ->	known
+
+# More third person singular verbs.
+1	Verb3 ->	speaks
+1	Verb3 ->	grows
+1	Verb3 ->	goes
+1	Verb3 ->	migrates
+1	Verb3 ->	suggests
+1	Verb3 ->	knows
+
+# Verbs (present, plural, third person).
+1	Misc ->	have
+1	Misc ->	speak
+1	Misc ->	cover
+1	Misc ->	are
+1	Misc ->	ride
+1	Misc ->	drink
+1	Misc ->	grow
+1	Misc ->	carry
+1	Misc ->	suggest
+1	Misc ->	migrate
+1	Misc ->	know
+
+# Wh-determiners.
+1	wh ->	that
+1	wh ->	what
+1	wh ->	which
+
+# Wh-pronouns.
+1	wh ->	what
+1	wh ->	who
+
+# Wh possessive pronoun.
+1	wh ->	whose
+
+# Wh-adverbs
+1	wh ->	how
+1	wh ->	when
+1	wh ->	where
+1	wh ->	why
+
+
+# Possessive marker.
+1	Misc ->	's

@@ -109,7 +109,6 @@ public class PCFGParser implements Parser {
             back.set(getIndex(i,i+1), b);
         }
 
-
         for (int span = 2; span <= sentence.size(); span++) {
             for (int begin = 0; begin <= sentence.size()-span; begin++) {
                 int end = begin+span;

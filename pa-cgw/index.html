@@ -1,0 +1,537 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Competitive Grammar Writing</title>
+</head>
+  <body>
+    <center>
+    <h1>Competitive Grammar Writing: <br> An Introduction to Natural Language Processing <br> <i>Reference Guide for Participants</i> </h1>
+
+      <p> Developed primarily by
+	<a href="http://www.cs.cmu.edu/~nasmith">Noah Smith</a> and
+	  <a href="http://www.cs.jhu.edu/~jason">Jason Eisner</a>, with 
+	  input from <a href="http://www.clsp.jhu.edu/~markus">Markus Dreyer</a> and <a href="http://www.cs.jhu.edu/~dasmith">David Smith</a>
+    </center>
+
+<div>
+      <center>
+<a href="#overview">Overview</a> |     
+	<a href="#model">Model</a> |
+	<a href="#tools">Tools</a> |
+	<a href="#evaluation">Evaluation</a> |
+	<a href="#tools">Tools</a> |
+	<a href="#keepingup">Keeping Up</a> |
+	<a href="#questions">Questions</a>
+      </center>
+</div>
+
+<br>
+<!--Summary instructions are available <a href="doit.html">here</a>.-->
+      <a name="overview">
+      <h2> Overview </h2>
+
+      Grammars are of interest to both linguists and engineers.  They
+      are a formal way of writing down how a language works.  
+      <ul>
+        <li>For linguists, the goal is to write down the true grammar
+          of the language -- the one that is subconsciously used by
+	  the language's speakers.
+        <li>For engineers, the goal is to apply the grammar to some
+          task.  This requires algorithms that make use of grammars: for 
+	  example, <b>generation</b> and <b>parsing</b> of sentences.
+      </ul>
+	  
+      In today's lab, you will work in a team to design a grammar for
+      as much of English as possible.  Nowadays it is fashionable to
+      construct grammars somewhat automatically.  But by building one
+      the old-fashioned manual way, you'll have to grapple directly with
+      linguistic phenomena, grammars, and probabilities.
+
+      <p>
+      <i>You do not have to write any code for this exercise!</i>
+	
+      <p>
+      Your system, which is in competition with those of the
+      other teams, will consist of two sub-grammars:
+      
+      <ul> 
+	<li>A weighted context-free grammar, S1, that is supposed to generate <b>all</b> and
+	  <b>only</b> English sentences</li>
+	<li> A weighted context-free grammar, S2, that generates <b>all word strings</b></li>
+      </ul>
+
+      If you could design S1 perfectly, then you wouldn't need S2.
+      But English is amazingly complicated, and you only have a few hours.
+      So S2 will serve as your fallback position.  It will be able to
+      handle any English sentences that S1 can't.
+
+      <p>
+      One way to see what your grammar does is to <b>generate</b>
+      random sentences from it.  For our purposes, generation is just
+      repeated symbol expansion.  To expand a symbol such as <code>NP</code>, our
+      sentence generator will randomly choose one of your grammar's 
+      <font color="green"><code><i>NP</i> -> ...</code></font>
+      rules, with probability proportional to the rule's
+      <b>weight</b>.  
+
+      <p>Your task is to write the grammar rules and also 
+      choose the weight for each rule.  The weights allow you to
+      express your knowledge of which English phenomena are common and
+      which ones are rare.  By giving a low weight to a rule (or to S2
+      itself), you express a belief that it doesn't happen very often
+      in English.
+
+      <p>
+      Another way to see what your grammar does is to <b>parse</b>
+      sentences with it.  You can use our parser to look at a sentence
+      and figure out whether your grammar could have generated it --
+      and how, and with what probability.  We say that your grammar
+      <b>predicts</b> a sentence well if (according to the parser)
+      your grammar has a comparatively high probability of generating
+      exactly that sentence.
+  
+      <p>
+      You will have to decide how much effort to expend on designing
+      S1 and S2, and how much you will trust S1 relative to S2.  Your
+      goal is to describe English accurately.  This means that your
+      grammar (especially the S1 subgrammar) should be able to
+      generate lots of syntactic constructions that show up in
+      English.  Moreover, it should have a higher probability of
+      generating common sentences, and a low or zero probability of
+      generating ungrammatical sentences.
+      
+      <p>
+	The performance of your system will be measured in two ways:
+	
+      <ol>
+	
+	<li> As a simple test, we will <b>randomly generate</b>
+	  sentences according to your S1 model, and see how many of
+	  them are <b>grammatical</b>.  To do well on this score, your S1
+	  should be restrictive enough to generate "real" English
+	  sentences only.
+
+	<li> For the real test, we will see how well your grammar
+	  <b>predicts</b> the output of the <b>other teams' grammars</b>
+	  (i.e., <i>their</i> randomly generated S1 sentences,
+	  excluding any ungrammatical ones).  Really we should
+	  see how well your grammar predicts some naturally occurring
+          English,
+	  like tomorrow's newspaper, but 
+	  it's more fun to pit the teams against one another.
+	  
+      </ol>
+
+      To do well on the second score, you need to guess what the other
+      teams are doing and keep up with them.  Your grammar must be
+      able to generate <i>their</i> sentences, and indeed do so with
+      high probability.  In practice you want your S1 to generate
+      their sentences; although your fallback grammar S2 can generate
+      all possible strings, it consequently has low probability of
+      generating any <i>particular</i> string.  So you will try to
+      make S1 extensive enough to handle anything that the other teams
+      can throw at you -- and extensive enough that you are throwing
+      tricky sentences back at the other teams!
+
+      
+	<a name="model">
+      <h2> The Model </h2>
+      
+      There are two components to the model, both of which are expressible as
+      weighted context-free grammars.
+      <p>
+      A weighted context free grammar consists of:
+      
+      <ul>
+      <li> A set of non-terminal symbols
+	<li> A set of terminal symbols
+	<li> A set of rewrite or derivation rules, each with an associated weight
+	<li> A start symbol
+      </ul>
+      
+      For natural language CFGs, we think of the start symbol as
+      indicating "sentence" (in this case it will be
+      <code>START</code>), and the terminal symbols as the words.
+      <p>
+      A derivation rule tells one way to rewrite a non-terminal symbol
+      into a sequence of non-terminal symbols and terminal symbols.
+      For example, <font color="green"><code>S -> NP VP</code></font> says that an <code>S</code>
+      (perhaps indicating a declarative sentence) can be rewritten as
+      an <code>NP</code> (noun phrase) followed by a <code>VP</code> (verb phrase).
+      
+      <p>
+      <b>A word about weights:</b> Today you heard a lot about
+      <i>probability</i> models.  In a probabilistic CFG, each rule
+      would have some probability associated with it, and the
+      probability of a derivation for a sentence would be the
+      product of all the rules that went into the derivation.
+      We don't want you to worry about making probabilities sum up to one,
+      so you can use any positive number as a weight.  
+      <p>
+
+      <h4> About Vocab </h4> 
+      <p>
+	In the file <code>Vocab.gr</code>, we are giving you the set of terminal
+        symbols (words), embedded in rules
+	of the form <font color="green"><code><i>Tag</i> -> word</code></font>. 
+	Note that the vocabulary is <b>closed</b>.  There will
+	be no unknown words in the test sentences, and you are not allowed
+        to add any
+	words (terminal symbols) to the grammar.  
+
+        <p>
+	We have given equal weights to all the <font color="green"><code><i>Tag</i> ->
+	  word</code></font> rules, but you are free to change the weights if
+	you like.  You are also free to add, remove, or change these
+        rules, as long as you don't add any new words.
+
+      <h4> About S1 </h4> We are giving you a simple little S1 to
+      start with.  It generates a subset of real English.  As noted,
+      we've also given you a set of <font
+      color="green"><code><i>Tag</i> -> word</code></font> rules, but
+      you might find that the tags aren't useful when trying to extend
+      S1 into a bigger English grammar.  So you are free to create new
+      tags for word classes that you find convenient or use the words
+      directly in the rules, if you find it advantageous.  We tried to
+      keep the vocabulary relatively small to make it easier for you
+      to do this.
+
+      <p>
+      You will almost certainly want to change the tags in rules
+      of the form <font color="green"><code><i>Misc</i> ->
+	word</code></font>.  But be careful: you don't want to 
+	change <font color="green"><code><i>Misc</i> -> goes</code></font>
+      to <font color="green"><code><i>VerbT</i> ->
+      goes</code></font>, since <code>goes</code> doesn't behave like
+      other <code>VerbT</code>'s.  In particular, you want your S1
+      to generate <font
+      color="green"><code>Guinevere has the chalice .</code></font>
+      but not <font
+      color="green"><code>Guinevere goes the chalice .</code></font>,
+      which is ungrammatical.  This is why you may want to invent
+      some new tags.
+      
+      <h4> About S2 </h4> The goal of S2 is to enforce the intuition
+      that <b> every </b> string of words should have some (possibly
+      miniscule) probability.  You can view it as a type of <b>
+      smoothing </b> of the probability model.  There are a number of
+      ways to enforce the requirement that no string have zero
+      probability under S2; we give you one to start with, and you are
+      free to change it.  Just note that your score will become
+      infinitely bad if you ever give zero probability to a sentence
+      (even if it's a crummy one generated by another team)!
+      <p>
+      Our method of enforcing this requirement is to use a grammar that
+      is effectively a bigram (or finite-state) model.  Suppose we only have
+      two tag types, <code>A</code> and <code>B</code>.  The set of rules
+      we would allow in S2 would be: <br>
+
+      <font color="green">
+	<code>
+	  S2 -> _A<br>
+	  S2 -> _B<br>
+	  S2 -><br>
+	  _A -> A<br>
+	  _A -> A _A<br>
+	  _A -> A _B<br>
+	  _B -> B<br>
+	  _B -> B _A<br>
+	  _B -> B _B<br>
+	</code> </font>
+
+      This grammar can generate any sequence of <code>A</code>s and <code>B</code>s,
+      and there is no ambiguity in parsing with it:  there is always a
+      single, right-branching
+      parse.
+      
+      <h4> Placing your bets </h4>
+
+      Two rules your grammar must include are <font color="green"><code>START -> S1</code></font> and
+      <font color="green"><code>START -> S2</code></font>.  The relative weight of these determines how
+      likely it is that S1 (with start symbol <code>S1</code>) or S2 (with
+      start symbol <code>S2</code>) would be selected in generating a sentence,
+      and how costly it is to choose one or the other when parsing a sentence.
+      <p>
+	Choosing the relative weight of these two rules is a gamble.  If you are
+        over-confident in your
+	"real" English grammar (S1), and you weight it too highly, then you
+	risk assigning very low probability to sentences generated by a team
+	whose grammar is more extensive (since the parser will have to resort
+	to your S2 to get a parse).
+      <p>
+	On the other hand, if you weight S2 too highly, then you will probably
+	do a poor job of predicting the other teams' sentences, since
+        S2 will not make any sentences
+	very likely (it accepts everything, so probability mass is spread
+	very thin across the space of word strings).  Of course, you can
+	invest some effort in trying to make S2 a better n-gram model, but
+	that's a tedious task and a risky investment.
+
+      
+      <a name="evaluation">
+      <h2> Evaluation </h2>
+
+      To evaluate the precision of your S1 grammar, we will first
+      generate a test set of sentences from it using
+      <code>randsent</code>.  
+      We will then make a grammaticality judgement about each sentence,
+      and your score will be the fraction of sentences judged to be
+      grammatical.  To judge the grammaticality of the sentences,
+      we will be using the best tool available:  human speakers (yourselves!).
+      Toward the end of the lab, we'll elicit grammaticality judgments from each of you
+      on a set of sentences
+      (which might have been generated by your grammar or someone else's -- so
+      be honest!).
+
+     <p>
+      The second score evaluates your full grammar (S1+S2) and is much
+     more important.  Here we will take the other teams' test sets
+     (removing the sentences that human judges couldn't parse) and try to
+     parse them with <i>your</i> grammar (the combination of S1 and
+     S2).  You will be able to parse all of the sentences (because S2
+     will accept anything, albeit with low probability).  The score
+     will be the cross-entropy of your model with respect to the test
+     set.  <b>A low cross-entropy is good;</b> it means that your model
+     is <i>unsurprised</i> by the test sentences generated by the
+     other teams.  We will report your model's cross-entropy on each
+     of the other teams' test sets.
+
+     <p>
+      If the test set of sentences is {s1, s2, s3, ...}, then your
+      model's cross-entropy is defined as <br>
+      &nbsp;&nbsp;&nbsp;(-log(p(s1)) - log(p(s2)) - log(p(s3)), ...  ) / (|s1| + |s2| + |s3| + ...)<br>
+      where |si| is the number of words in the ith sentence.
+      Note that <br>
+      &nbsp;&nbsp;&nbsp;-log(1)=0, -log(1/2)=1, -log(1/4)=2, -log(1/8)=3, ... -log(0)=infinity<br>
+      So a high cross-entropy corresponds to a low probability and
+      vice-versa.  You will be severely penalized for probabilities
+      close to zero.
+     
+
+     <p>
+     <font size=-1>Note: p(s) denotes the probability that a randomly
+     generated sentence is exactly s.  Often your grammar will have
+     many different ways to generate s, corresponding to many
+     different trees.  In that case, p(s) is the total probability of
+     all those trees.  However, for convenience, we approximate this
+     with the probability of the single most likely tree, because that
+     is what our parser happens to find.  So we are really only
+     measuring <i>approximate</i> cross-entropy.</font>
+      
+     <!-- Again, S2 will be able to accept any word string, but the
+     probability will generally be quite low.  So if you have very
+     high confidence in your S1, you can assign a relatively high
+     weight to S1, making S2 a sort of highly costly emergency
+     back-up.  If you aren't so sure about S1, then you'll want to
+     rely more heavily on S2 by giving it a higher weight - but in
+     general it will give low weight to most sentences. -->
+	
+      <p> We want to draw attention to a blunder made by some previous participants.
+	Remember the part about weighting the
+	<font color="green"><code>START -> S1</code></font> and
+	<font color="green"><code>START -> S2</code></font> rules?  Few teams change
+	those weights from their defaults; doing so helps their cross-entropy scores a lot.
+      
+      <a name="tools">
+      <h2> Tools at Your Disposal </h2>
+
+      We have given you tools to parse sentences, to generate sentences
+      randomly according to your grammar, and to compute the cross-entropy
+      of your grammar with respect to a set of sentences.  We've also given
+      you a tool to check for terminal symbols you may have accidentally
+      added to the grammar.
+
+      <p>  There are two file formats to know about.  The first is for sentences
+	generated by a grammar, or to be parsed by a grammar.  We name files in this
+	format with the suffix <code>.sen&nbsp;</code>.  Simply put one sentence per
+	line, with spaces between tokens.  Make sure you put spaces before and after
+	punctuation symbols, since, for example <code>Arthur,</code> will look like
+	one token to the parser, while <code>Arthur&nbsp;,</code> is what you want
+	(two tokens).
+	<p>
+	The file format for the grammar is also quite simple.  We
+	name these files with the suffix <code>.gr&nbsp;</code>.  On a
+	given line, anything following <code>#</code> is an ignored
+	comment.  Each rule goes on one line, in the format: <br>
+	<font color="blue"><code> <i>weight</i> X Y<sub>1</sub>
+	Y<sub>2</sub> ... Y<sub>n</sub></code><br></font> signifying
+	the rule <font color="green"><code> X -> Y<sub>1</sub>
+	Y<sub>2</sub> ... Y<sub>n</sub> </code></font> (where
+	<code>X</code> is a non-terminal and the <code>Y</code>s are
+	any mix of terminals and non-terminals), and it gets weight <i><code>weight</code></i>.
+	<p>
+	Be careful not to name any of your non-terminals the same as
+	any terminals, since the parser will assume you intended to conflate the symbols.  
+        Blank lines will be ignored.  If you accidentally include
+	the same rule more than once, its weight will be the <i>sum</i> of the weights
+	in the grammar file(s).
+
+	<p> From here on <code>.gr</code> files refer to grammar files,
+	and <code>.sen</code> files refer to sentence files.
+
+	<h4>Random sentence generator: </h4>
+
+      This program will randomly generate
+      sentences according to the distribution defined by your weighted grammar.<br>
+
+      <font color="#BB0000"><code> cat <i>grammar-file(s)</i> | randsent [ -t ] [ -n <i>num-sentences</i> ] 
+	[ -s <i>start-symbol</i> ] </font> <br>
+
+	<ul>
+	  <li>    <font color="#BB0000"><code>-t</code></font>:  produce tree output instead of flat sentences.
+	  <li> <font color="#BB0000"><code>-n <i>num-sentences</i></code></font>:  e.g., <font color="#BB0000"><code>-n 10</code></font> will generate
+	    ten sentences instead of just one.
+	  <li> <font color="#BB0000"><code> -s <i>start-symbol</i></code></font>:   The generator's start symbol is <code>START</code> by default.
+     You may want to specify another so you can test just part of 
+     the grammar (e.g., <code>S1</code>).
+     <li> <font color="#BB0000"><code> -g <i>single-grammar-file</i></code></font>:  Instead of reading the grammar files from standard input, read them from a single file.
+	  <li> <font color="#BB0000"><code><i>grammar-files</i></code></font>: Typically <code>*.gr</code>.  In general, a list of <code>.gr</code>
+     files containing the parts of the grammar.  Different parts
+     may be written by different people.
+	</ul>
+
+      So to generate 17 trees from your entire merged grammar (S1 and S2 combined),
+      and to make the trees "pretty," you might run: <br>
+      <font color="#BB0000"><code> cat *.gr | randsent -t -n 17 -s START | prettyprint </code></font> <br>
+
+      If your grammar is in a single file <code>fullgrammar.gr</code>, you may equivalently run: <br>
+      <font color="#BB0000"><code> randsent -t -n 17 -s START -g fullgrammar.gr | prettyprint </code></font>
+
+      You can also list more than one grammar file: <br>
+      <font color="#BB0000"><code> randsent -t -n 17 -s START -g fullgrammar.gr extrarules.gr | prettyprint </code></font>
+
+      <h4>Earley Parser (and pre/post-processing scripts): </h4>
+	The parser was written in <a href="http://www.dyna.org">Dyna</a> and C++.
+      To use the parser:<br>
+
+
+	  <font color="#BB0000"><code>parse -g <i>grammar-file(s)</i> -i <i>sentence-file(s)</i></code></font>  <br>
+You can also pipe grammar files <i>or</i> sentence files in through standard input (not both; if you don't specify <code>-g</code> or <code>-i</code>, the program won't know what's what): <br>
+	  <font color="#BB0000"><code> cat <i>grammar-file(s)</i> | parse -i <i>sentence-file(s)</i></code></font>  <br>
+	  <font color="#BB0000"><code> cat <i>sentence-file(s)</i> | parse -g <i>grammar-file(s)</i></code></font>  <br>
+
+Many other options are available:
+	<ul>
+	  <li> <code><font color="#BB0000"><i>sentence-file(s)</i></code></font>: Names of files with one input sentence per line.
+	  <li> <font color="#BB0000"><code>-g <i>grammar-file</code></font></i>:  Name of the file containing the grammar.
+	  <li> <font color="#BB0000"><code>-s <i>start-symbol</i></code></font>: 
+	    The parser's default start symbol is START.
+	    You may want to specify another.
+	  <li> <font color="#BB0000"><code>-h</code></font>:  Prints help, including details on many useful options.
+	</ul>
+
+	<p> It is expected that your grammar will be in multiple files.  If you follow
+	our convention and name
+	all of these ending in <code>.gr</code> you can parse with something like:
+	<br>
+	<font color="#BB0000"><code> cat *.gr | parse -i <i>sentence-file(s)</i> </code> </font><br>
+	  which will take sentences from <i>sentence-file(s)</i> and use all your grammar
+	  files.
+    
+	<p> If a sentence fails to parse, its output will be
+	  <code>failure</code> on a single line.  If the parse is successful, you
+	  will see the single best-scoring (highest-weight) parse on one line.  Additional
+	  options let you see the probability of the sentence, the probability
+	  of the best parse, the number of parses the sentence has under the grammar,
+	  and the cross-entropy (in bits per word) of your sentence file.
+	<p>
+	You will get an error if your grammar includes additional vocabulary, and a warning will print
+	if your sentences contain words not in the grammar.
+      <p>
+	If you want to make the parses a bit more readable, pipe the
+	output of <code>parse</code> to <code>prettyprint</code>.  
+	
+	<br><font color="#BB0000"><code> parse -i <i>sentence-file</i> -g <i>grammar-file</i> | prettyprint</code></font>  
+
+      <p> If you want
+	to see how you're doing in terms of cross-entropy:
+	
+	<br><font color="#BB0000"><code> parse -i <i>sentence-file</i> -g <i>grammar-file</i> -nC </code></font>   <br>
+(The <font color="#BB0000"><code>-n</code></font> suppresses the parses, and the <font color="#BB0000"><code>-C</code></font> option indicates cross-entropy.)
+
+
+      <h4> Checking for new vocabulary: </h4>
+      New vocabulary is strictly forbidden!  Sometimes, though, you might
+      add a non-terminal on the right-hand side of a rule and forget to give
+      its expansion rules.  Or you might forget exactly which words are in the
+      vocabulary.  To check for new terminals: <br>
+      <font color="#BB0000"><code> cat <i>grammar-files</i> | check-for-new-terms</code></font> <br>
+      This will list any un-expandable symbols (terminals) in your grammar that
+      are not in the vocabulary we've provided.
+      <p>
+	Note that this check is called automatically whenever you call
+	<code>parse</code> or <code>randsent</code>, so you will get constant
+	warnings until you fix the illegal terminals.
+
+
+      
+      <a name="keepingup">
+      <h2> Keeping Up: Training Data </h2> Throughout the exercise, we
+      will make more and more "training data" available to all the
+      teams.  This data will come from S1-sentences generated by each
+      team's grammar.
+      You will be able to find this data in your team's subdirectory <code>generated_data</code>.
+      Check back often to keep on top of what
+      kinds of sentences the others are generating!
+      <p>
+      In addition, we
+      have generated examples of sentences you might want to try to design for.  
+      They
+      are listed in the file called <code>examples.sen</code> in the <code>start</code>
+	directory.  
+      These are just
+      suggestions; they aren't part of the evaluation.  If you want to get more ideas
+      about how to stump the other teams, we suggest looking on the Web.  It's not
+      hard to find complicated sentences.
+
+      
+      <a name="questions">
+      <h2> Questions for Discussion </h2>
+      <ul>
+        <li> What were some of the linguistic phenomena you handled,
+             and how?
+        <li> If s is a sentence, and p1(s) and p2(s) denote the
+             respective probabilities that S1 and S2 generate s,
+	     then what is the probability that the whole grammar
+	     generates s?
+	<li> How could you improve the probabilities assigned by S2,
+             without losing the guarantee that S2 can generate any
+             string of words?
+	<li> What would happen if you didn't have S2?
+	<li> Is there any other way to combine S1 and S2 besides the
+             one we recommended?
+	<li> Suppose you strategically decided to make your grammar devote 
+	     most of its probability to a really unusual sentence.  Who would 
+	     that hurt more - your team or the other teams?
+<!--	<li> Why is it somewhat ironic that we might be using an NLP system (Xtag) to
+	     check that your grammar generates real English? -->
+
+       <li> Suppose you were leading a 6-week (or 6-year) team effort to
+              build a grammar for English.  How would you
+              organize the effort?
+              How would you track your progress?  What kinds of tools
+            or other resources would you want to develop?  
+         <li> How does your answer to the previous question change if the
+            language is not English?  Does it matter what family of language
+            it is?  What if you and your teammates don't speak it?
+
+	<li>Your grammar scores well when
+	  it finds a parse of high probability.  But S1 might produce several  
+	  different parses of a sentence, dividing the probability among them. 
+	  Is the scoring method fair?
+
+      </ul>
+      
+      
+      <center><a href="#overview">Overview</a> |     
+	<a href="#model">Model</a> |
+	<a href="#tools">Tools</a> |
+	<a href="#evaluation">Evaluation</a> |
+	<a href="#tools">Tools</a> |
+	<a href="#keepingup">Keeping Up</a> |
+	<a href="#questions">Questions</a>
+	
+      </center>
+       
+ </body>
+</html>

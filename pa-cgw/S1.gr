@@ -1,0 +1,44 @@
+# The start symbol is START.
+
+# These two rules are required; choose their weights carefully!
+60 START -> S1
+40 START -> S2
+
+# This is a very, very, very simple grammar to get you started.
+
+# NP: noun phrase
+# VP: verb phrase
+# pause: sentence seperator (comma, etc.)
+# CConj: and, but, etc.
+# qmark: ?
+# eos: end of sentence char
+# per: period
+# VerbT: third person verb
+
+20 S1 -> NP VP eos
+5 S1 -> NP VP pause CConj NP VP eos
+1 S1 -> {wh | d | wh d} (VP) NP VP qmark
+
+20 eos -> per
+2 eos -> exclam
+
+100 Verb -> { VerbT | Verb3 }
+
+10 VP -> Verb NP
+1 VP -> (Modal) BaseVerb (NP)
+1 VP -> Verb3
+1 VP -> Verb (NP)
+
+1 VP -> i Adj
+
+1 NP -> PresPart (PP)
+
+20 NP -> {Det | posspn}  (Adj) Nbar
+1 NP -> {Proper | plnoun}
+
+20 Nbar -> Noun
+1 Nbar -> Nbar PP
+
+1 PP -> Prep NP
+
+1 VP -> Verb t NP

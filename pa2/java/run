@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# You may find this shell script helpful.
+
+if [[ $# -eq 0 ]]; then
+  DATA=miniTest
+else
+  DATA=$1
+fi
+
+java -Xmx1g -cp classes \
+  cs224n.assignment.PCFGParserTester \
+  -data $DATA \
+  -parser cs224n.assignment.PCFGParser
