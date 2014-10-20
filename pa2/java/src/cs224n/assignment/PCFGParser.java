@@ -13,7 +13,7 @@ import cs224n.assignment.*;
 public class PCFGParser implements Parser {
     private Grammar grammar;
     private Lexicon lexicon;
-    private Interner interner;
+    private Interner interner = new Interner ();
 
     private List<IdentityHashMap<Object, Double>> score;
     private List<IdentityHashMap<Object, Triplet<Integer, String, String>>> back;
@@ -59,108 +59,111 @@ public class PCFGParser implements Parser {
         parseTree.setChildren(children);
     }
 
+    /* Initialize the data structures */
+    private void initializeTable (int len) {
+      IdentityHashMap<Object, Double> s;
+      IdentityHashMap<Object, Triplet<Integer, String, String>> b;
+      for (int i = 0; i < len*(len+1)/2; i++) {
+          s = new IdentityHashMap<Object, Double>();
+          b = new IdentityHashMap<Object, Triplet<Integer, String, String>>();
+          score.add(s);
+          back.add(b);
+      }
+    }
+
+    private void handleUnaries (IdentityHashMap<Object, Double> s, 
+                                IdentityHashMap<Object, Triplet<Integer, 
+                                String, String>> b) {
+      Boolean added = true;
+      while (added) {
+        added = false;
+        Set<Object> keySet = new HashSet<Object>(s.keySet()); // to avoid getting java.util.ConcurrentModificationException
+        for (Object B : keySet) {                    
+          if (s.get(B) > 0) {
+            List<Grammar.UnaryRule> rules = grammar.getUnaryRulesByChild(B.toString());
+            for (Grammar.UnaryRule unary : rules) {
+                double prob = s.get(B) * unary.getScore();
+
+              if (!s.containsKey(interner.intern(unary.getParent())) || prob > s.get(interner.intern(unary.getParent()))) {
+                  added = true;
+                  s.put(interner.intern(unary.getParent()), prob);
+                  b.put(interner.intern(unary.getParent()), new Triplet<Integer, String, String>(kIndexBase, unary.getChild(), null));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    private void firstTime (List<String> sentence) {
+      IdentityHashMap<Object, Double> s;
+      IdentityHashMap<Object, Triplet<Integer, String, String>> b;
+      for (int i = 0; i < sentence.size(); i++) {
+        s = score.get(getIndex(i, i+1));
+        b = back.get(getIndex(i, i+1));
+        
+        for (String tag : lexicon.getAllTags()) { // TODO: We can optimize by having getAllTags take a string word argument and only return the ones relevant to that word
+            s.put(interner.intern(tag), lexicon.scoreTagging(sentence.get(i), tag));
+            b.put(interner.intern(tag), new Triplet<Integer, String, String>(kIndexBase, sentence.get(i), null));
+        }
+
+        handleUnaries (s, b);
+
+        score.set(getIndex(i,i+1), s);
+        back.set(getIndex(i,i+1), b);
+      }
+    }
+
+    private void ckyParse (List<String> sentence) {
+      IdentityHashMap<Object, Double> s;
+      IdentityHashMap<Object, Triplet<Integer, String, String>> b;
+      for (int span = 2; span <= sentence.size(); span++) {
+        for (int begin = 0; begin <= sentence.size()-span; begin++) {
+          int end = begin+span;
+          s = score.get(getIndex(begin,end));
+          b = back.get(getIndex(begin, end));
+
+          // Binary
+          for (int split = begin+1; split <= end-1; split++) {
+            IdentityHashMap<Object, Double> lscores = score.get(getIndex(begin,split));
+            IdentityHashMap<Object, Double> rscores = score.get(getIndex(split,end)); 
+
+            for (Object tag : lscores.keySet()) {
+              for (Grammar.BinaryRule r : grammar.getBinaryRulesByLeftChild(tag.toString())) {
+                if (!rscores.containsKey(interner.intern(r.getRightChild())))
+                    continue;
+
+                double prob = rscores.get(interner.intern(r.getRightChild()))*lscores.get(interner.intern(r.getLeftChild()))*r.getScore();
+                if (!s.containsKey(interner.intern(r.getParent())) || prob > s.get(interner.intern(r.getParent()))) {
+                    s.put(interner.intern(r.getParent()), prob);
+                    b.put(interner.intern(r.getParent()), new Triplet<Integer, String, String>(split, r.getLeftChild(), r.getRightChild()));
+                }
+              }
+            }
+          }
+
+          handleUnaries (s, b);
+
+          score.set(getIndex(begin,end), s);
+          back.set(getIndex(begin,end), b);
+        }
+      }
+    }
+
+
     public Tree<String> getBestParse(List<String> sentence) {
+      // Init datastructure
+      int N = sentence.size()+1;
+      score = new ArrayList< IdentityHashMap<Object, Double> >(N*(N+1)/2);
+      back = new ArrayList<IdentityHashMap<Object, Triplet<Integer, String, String>>>(N*(N+1)/2);
 
-        interner = new Interner ();
-        // Init datastructure
-        int N = sentence.size()+1;
-        score = new ArrayList< IdentityHashMap<Object, Double> >(N*(N+1)/2);
-        back = new ArrayList<IdentityHashMap<Object, Triplet<Integer, String, String>>>(N*(N+1)/2);
+      initializeTable (N);
+      firstTime(sentence);
 
-        IdentityHashMap<Object, Double> s;
-        IdentityHashMap<Object, Triplet<Integer, String, String>> b;
-        for (int i = 0; i < N*(N+1)/2; i++) { // TODO: fix this ugly mess.
-            s = new IdentityHashMap<Object, Double>();
-            b = new IdentityHashMap<Object, Triplet<Integer, String, String>>();
-            score.add(s);
-            back.add(b);
-        }
+      ckyParse (sentence);
 
-        for (int i = 0; i < sentence.size(); i++) {
-            s = new IdentityHashMap<Object, Double>();
-            b = new IdentityHashMap<Object, Triplet<Integer, String, String>>();
-            
-            for (String tag : lexicon.getAllTags()) { // TODO: We can optimize by having getAllTags take a string word argument and only return the ones relevant to that word
-                s.put(interner.intern(tag), lexicon.scoreTagging(sentence.get(i), tag));
-                b.put(interner.intern(tag), new Triplet<Integer, String, String>(kIndexBase, sentence.get(i), null));
-            }
-
-            Boolean added = true;
-            while (added) {
-                added = false;
-                    Set<Object> keySet = new HashSet<Object>(s.keySet()); // to avoid getting java.util.ConcurrentModificationException
-                    for (Object B : keySet) {                    
-                        if (s.get(B) > 0) {
-                        List<Grammar.UnaryRule> rules = grammar.getUnaryRulesByChild(B.toString());
-                        for (Grammar.UnaryRule unary : rules) {
-                            double prob = s.get(B) * unary.getScore();
-
-                            if (!s.containsKey(interner.intern(unary.getParent())) || prob > s.get(interner.intern(unary.getParent()))) {
-                                added = true;
-                                s.put(interner.intern(unary.getParent()), prob);
-                                b.put(interner.intern(unary.getParent()), new Triplet<Integer, String, String>(kIndexBase, unary.getChild(), null));
-                            }
-                        }
-                    }
-                }
-            }
-
-            score.set(getIndex(i,i+1), s);
-            back.set(getIndex(i,i+1), b);
-        }
-
-        for (int span = 2; span <= sentence.size(); span++) {
-            for (int begin = 0; begin <= sentence.size()-span; begin++) {
-                int end = begin+span;
-                s = new IdentityHashMap<Object, Double>();
-                b = new IdentityHashMap<Object, Triplet<Integer, String, String>>();
-
-                // Binary
-                for (int split = begin+1; split <= end-1; split++) {
-                    IdentityHashMap<Object, Double> lscores = score.get(getIndex(begin,split)); // TODO: check this
-                    IdentityHashMap<Object, Double> rscores = score.get(getIndex(split,end));   // TODO: check this
-
-                    for (Object tag : lscores.keySet()) {
-                        for (Grammar.BinaryRule r : grammar.getBinaryRulesByLeftChild(tag.toString())) {
-                            if (!rscores.containsKey(interner.intern(r.getRightChild())))
-                                continue;
-
-                            double prob = rscores.get(interner.intern(r.getRightChild()))*lscores.get(interner.intern(r.getLeftChild()))*r.getScore();
-                            if (!s.containsKey(interner.intern(r.getParent())) || prob > s.get(interner.intern(r.getParent()))) {
-                                s.put(interner.intern(r.getParent()), prob);
-                                b.put(interner.intern(r.getParent()), new Triplet<Integer, String, String>(split, r.getLeftChild(), r.getRightChild()));
-                            }
-                        }
-                    }
-                }
-
-                // Unary rules
-                Boolean added = true;
-                while (added) {
-                    added = false;
-                    Set<Object> keySet = new HashSet<Object>(s.keySet()); // to avoid getting java.util.ConcurrentModificationException
-                    for (Object B : keySet) {
-                        if (s.get(B) > 0) {
-                            List<Grammar.UnaryRule> rules = grammar.getUnaryRulesByChild(B.toString());
-                            for (Grammar.UnaryRule unary : rules) {
-                                double prob = s.get(B) * unary.getScore();
-                                if (!s.containsKey(interner.intern(unary.getParent())) || prob > s.get(interner.intern(unary.getParent()))) {
-                                    added = true;
-                                    s.put(interner.intern(unary.getParent()), prob);
-                                    b.put(interner.intern(unary.getParent()), new Triplet<Integer, String, String>(kIndexBase, unary.getChild(), null));
-                                }
-                            }
-                        }
-                    }
-                }
-
-                score.set(getIndex(begin,end), s);
-                back.set(getIndex(begin,end), b);
-            }
-        }
-
-        Tree<String> parseTree = new Tree<String>(kRootNode);
-        addToTree (parseTree, 0, sentence.size(), kRootNode);
-        return TreeAnnotations.unAnnotateTree(parseTree);
+      Tree<String> parseTree = new Tree<String>(kRootNode);
+      addToTree (parseTree, 0, sentence.size(), kRootNode);
+      return TreeAnnotations.unAnnotateTree(parseTree);
     }
 }

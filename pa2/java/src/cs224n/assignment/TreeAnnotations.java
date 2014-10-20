@@ -15,12 +15,17 @@ import cs224n.util.Filter;
  * scoring.
  */
 public class TreeAnnotations {
-	public static Tree<String> annotateTree(Tree<String> unAnnotatedTree) {
-		// TODO: change the annotation from a lossless binarization to a
-		// finite-order markov process (try at least 1st and 2nd order)
 
+	//Change this flag to change the order of the vertical markovization
+	//JM: You should submit separate files with separate flags (but the main
+	// file should have this set to 2)
+	private static int markovOrder = 2; 
+
+	public static Tree<String> annotateTree(Tree<String> unAnnotatedTree) {
 		// Mark nodes with the label of their parent nodes, giving a second order vertical markov process
-    markovize(unAnnotatedTree, new ArrayList<String>(), 2);
+    if (markovOrder > 1) {
+    	markovize(unAnnotatedTree, new ArrayList<String>(), markovOrder - 1);
+    }
     // System.out.println("Markovized: "+unAnnotatedTree.toString());
     return binarizeTree(unAnnotatedTree);
 	}
