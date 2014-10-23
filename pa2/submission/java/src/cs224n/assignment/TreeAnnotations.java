@@ -16,7 +16,9 @@ import cs224n.util.Filter;
  */
 public class TreeAnnotations {
 
-	// Change this flag to change the order of the vertical markovization
+	//Change this flag to change the order of the vertical markovization
+	//JM: You should submit separate files with separate flags (but the main
+	// file should have this set to 2)
 	private static int markovOrder = 2; 
 
 	public static Tree<String> annotateTree(Tree<String> unAnnotatedTree) {
@@ -34,7 +36,8 @@ public class TreeAnnotations {
   private static void markovize(Tree<String> tree, ArrayList<String> parents, int order) {
     // Don't do anything to the original words
     if (tree.isLeaf())
-      { return; }
+      { return; } // tree.getLabel()
+
     String tag = tree.getLabel();
     for (String parent : parents)
       tag += "^" + parent;
