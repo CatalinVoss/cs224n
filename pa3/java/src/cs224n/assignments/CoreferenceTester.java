@@ -5,6 +5,11 @@ import cs224n.coref.Document;
 import cs224n.coref.Entity;
 import cs224n.coref.Mention;
 import cs224n.corefsystems.BaselineCoreferenceSystem;
+import cs224n.corefsystems.BetterBaseline;
+import cs224n.corefsystems.ClassifierBased;
+import cs224n.corefsystems.AllSingleton;
+import cs224n.corefsystems.RuleBased;
+import cs224n.corefsystems.OneCluster;
 import cs224n.corefsystems.CoreferenceSystem;
 import cs224n.util.*;
 
@@ -567,8 +572,13 @@ public class CoreferenceTester<SYS extends CoreferenceSystem> {
     //--Create Coreference Class
     System.out.print("Creating model...");
     //(classname)
-    String systemClass = props.getProperty("model","baseline");
+    String systemClass = props.getProperty("model","baseline"); // Default is baseline
     if(systemClass.equalsIgnoreCase("baseline")){ systemClass = BaselineCoreferenceSystem.class.getName(); }
+    if(systemClass.equalsIgnoreCase("better_baseline")){ systemClass = BetterBaseline.class.getName(); }
+    if(systemClass.equalsIgnoreCase("classifier")){ systemClass = ClassifierBased.class.getName(); }
+    if(systemClass.equalsIgnoreCase("all_singleton")){ systemClass = AllSingleton.class.getName(); }
+    if(systemClass.equalsIgnoreCase("rule")){ systemClass = RuleBased.class.getName(); }
+    if(systemClass.equalsIgnoreCase("one_cluster")){ systemClass = OneCluster.class.getName(); }
     //(create)
     CoreferenceSystem system;
     try{
