@@ -4,6 +4,7 @@ import cs224n.coref.ClusteredMention;
 import cs224n.coref.Document;
 import cs224n.coref.Entity;
 import cs224n.coref.Mention;
+import cs224n.coref.Pronoun;
 import cs224n.util.*;
 
 import java.util.ArrayList;
@@ -13,9 +14,6 @@ public class BetterBaseline implements CoreferenceSystem {
   // For each cluster counts the number of headword pairs that appeared together: (A,B,C,D) => AB++, AC++, AD++, BC++, BD++, ... (the transitive closure of this subgraph)
   CounterMap<String, String> coreferentHeads = null;
 
-  private static final Set<String> kPronouns = new HashSet<String>(Arrays.asList( 
-    new String[] {"I", "he", "she", "it", "they", "them", "that", "this", "we", "us", "you", "her", "him"}
-  ));
   private static final Double kCorefHeadThresh = 1.0;
 
 	@Override
@@ -31,7 +29,7 @@ public class BetterBaseline implements CoreferenceSystem {
       for (Entity e : clusters) {
         for (Pair<Mention, Mention> mentionPair : e.orderedMentionPairs()) { // iterable and order-sensitive; BA and AB will both show up
           // Exclude he/she/it/etc.
-          if (!kPronouns.contains(mentionPair.getFirst().headWord()) && !kPronouns.contains(mentionPair.getSecond().headWord()))
+          //if (!Pronoun.isSomePronoun(mentionPair.getFirst().headWord()) && !Pronoun.isSomePronoun(mentionPair.getSecond().headWord()))
             coreferentHeads.incrementCount(mentionPair.getFirst().headWord(), mentionPair.getSecond().headWord(), 1.0);
         }
       }

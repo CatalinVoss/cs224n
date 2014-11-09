@@ -23,7 +23,7 @@ public class OneCluster implements CoreferenceSystem {
     List<ClusteredMention> mentions = new ArrayList<ClusteredMention>();
 
     // For each mention
-    for (Mention m : doc.getMentions()) {
+    for (Mention m : doc.getMentions()) { //TODO: Change this to addAll, which was given in the starter code.
       // Mark the first mention as the single cluster
       if (singleCluster == null) {
         singleCluster = m.markSingleton();

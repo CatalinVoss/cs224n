@@ -101,6 +101,10 @@ public interface Feature {
     public ExactMatch(boolean exactMatch){ super(exactMatch); }
   }
   
+  // public static class NumWordsToPrev extends IntIndicator {
+  //   public NumWordToPrev(int numWordsToPrev) { super(numWordsToPrev); }
+  // }
+
   /*
    * TODO: Add values to the indicators here.
    */

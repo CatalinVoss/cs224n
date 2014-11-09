@@ -18,7 +18,10 @@ public class RuleBased implements CoreferenceSystem {
 
 	@Override
 	public List<ClusteredMention> runCoreference(Document doc) {
-		// TODO Auto-generated method stub
+		List<ClusteredMentions> clustM = new List<ClusteredMentions> ();
+		for (Mention m : doc) {
+
+		}
 		return null;
 	}
 

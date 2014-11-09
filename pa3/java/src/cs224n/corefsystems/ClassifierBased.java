@@ -34,6 +34,7 @@ public class ClassifierBased implements CoreferenceSystem {
 			 */
 
 			Feature.ExactMatch.class,
+			// Feature.NumWordsToPrev.class,
 
 			//skeleton for how to create a pair feature
 			//Pair.make(Feature.IsFeature1.class, Feature.IsFeature2.class),
@@ -60,7 +61,11 @@ public class ClassifierBased implements CoreferenceSystem {
 			if(clazz.equals(Feature.ExactMatch.class)){
 				//(exact string match)
 				return new Feature.ExactMatch(onPrix.gloss().equals(candidate.gloss()));
-//			} else if(clazz.equals(Feature.NewFeature.class) {
+			// } else if (clazz.equals(Feature.NumWordsToPrev)) {
+			// 	return new Feature.NumWordsToPrev(10);
+			
+
+				//else if(clazz.equals(Feature.NewFeature.class) {
 				/*
 				 * TODO: Add features to return for specific classes. Implement calculating values of features here.
 				 */
