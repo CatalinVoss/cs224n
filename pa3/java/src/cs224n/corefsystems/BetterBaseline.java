@@ -13,7 +13,6 @@ import java.util.*;
 public class BetterBaseline implements CoreferenceSystem {
   // For each cluster counts the number of headword pairs that appeared together: (A,B,C,D) => AB++, AC++, AD++, BC++, BD++, ... (the transitive closure of this subgraph)
   CounterMap<String, String> coreferentHeads = null;
-
   private static final Double kCorefHeadThresh = 1.0;
 
 	@Override
@@ -24,6 +23,8 @@ public class BetterBaseline implements CoreferenceSystem {
       Document doc = pair.getFirst();
       List<Entity> clusters = pair.getSecond();
       List<Mention> mentions = doc.getMentions();
+
+                     // System.out.println(doc.prettyPrint(clusters));
 
       // For all coreferent mention pairs
       for (Entity e : clusters) {
@@ -46,27 +47,26 @@ public class BetterBaseline implements CoreferenceSystem {
     for (Mention m : doc.getMentions()){
       String head = m.headWord();
 
-      Set<String> corefs = coreferentHeads.getCounter(head).keySet();
-      boolean added = false;
-      for (String s : corefs) {
-        if (coreferentHeads.getCount(head,s) >= kCorefHeadThresh) {
-          if (clusters.containsKey(s)) { // if we've seen this alt head s before
-            mentions.add(m.markCoreferent(clusters.get(s)));
-            added = true;
-            break;
+      if (clusters.containsKey(head)) { // if we've seen this head before
+        mentions.add(m.markCoreferent(clusters.get(head)));
+      } else {
+        Set<String> corefs = coreferentHeads.getCounter(head).keySet();
+        boolean added = false;
+        for (String s : corefs) {
+          if (coreferentHeads.getCount(head,s) >= kCorefHeadThresh) {
+            if (clusters.containsKey(s)) { // if we've seen this alt head s before
+              mentions.add(m.markCoreferent(clusters.get(s)));
+              added = true;
+              break;
+            }
           }
         }
-      }
-      if (!added) {
-        if (clusters.containsKey(head)) { // if we've seen this head before
-          mentions.add(m.markCoreferent(clusters.get(head)));
-        } else { // Else create a new singleton cluster)
+        if (!added) {
           ClusteredMention newCluster = m.markSingleton();
           mentions.add(newCluster);
           clusters.put(head,newCluster.entity);
         }
       }
-
     } // end for Mention m
 
     return mentions;
