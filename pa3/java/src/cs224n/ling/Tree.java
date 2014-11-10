@@ -20,7 +20,7 @@ public class Tree<L> implements Serializable, Decodable {
 
   private L label;
   private List<Tree<L>> children;
-  private int uniqueIndex = nextUniqueIndex++;
+  public int uniqueIndex = nextUniqueIndex++;
 
 
   public List<Tree<L>> getChildren() {
