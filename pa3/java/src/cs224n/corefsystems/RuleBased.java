@@ -91,29 +91,6 @@ public class RuleBased implements CoreferenceSystem {
       m.removeCoreference();
       clusterMap.put(m, m.markCoreferent(m1));
     }
-
-    // for (Mention m : m1.entity.mentions)
-    //   m.removeCoreference();
-    // for (Mention m : m2.entity.mentions)
-    //   m.removeCoreference();
-
-    // m1.entity.addAll(m2.entity.mentions);
-    // m2.entity.addAll(m1.entity.mentions);
-    // System.out.println ("next");
-
-    // Iterator<Mention> iterator = m2.entity.iterator();
-    // while (iterator.hasNext()) {
-    //   Mention m = iterator.next();
-    //   m2 = m2.mention.markCoreferent(m);
-    // }
-
-    // Iterator<Mention> i = m1.entity.iterator();
-    // while (i.hasNext()) {
-    //   Mention m = i.next();
-    //   m1 = m1.mention.markCoreferent(m);
-    // }
-
-
   }
 
   void pass1(HashMap<Mention, ClusteredMention> mentions) {
@@ -156,14 +133,13 @@ public class RuleBased implements CoreferenceSystem {
   //included in the non-stop words of the antecedent cluster 
   private static boolean wordInclusion(ClusteredMention m1, ClusteredMention m2) {
     HashSet<String> m2Words = new HashSet<String>();
-    for(Mention m : m2.entity.mentions) {
+    for (Mention m : m2.entity.mentions) {
       for (String word : m.text()) {
         if (!StopWords.isSomeStopWord(word)) {
           m2Words.add(word);
         }
       }
     }
-
 
     for (Mention mention : m1.entity.mentions) {
       for (String word : mention.text()) {
@@ -181,7 +157,7 @@ public class RuleBased implements CoreferenceSystem {
     return tag.equals ("JJ") || tag.equals ("JJR") || tag.equals("JJS");
   }
 
-  //return true if the mention’s modifiers are all included in the modifiers 
+  //return true if the mention's modifiers are all included in the modifiers 
   //of the antecedent candidate
   private static boolean compatibleModifiers(Mention m1, Mention m2) {
     //only nouns or adjectives
@@ -198,7 +174,7 @@ public class RuleBased implements CoreferenceSystem {
 
   //TODO: THIS DOESN'T ACTUALLY WORK RIGHT NOW!
   // returns true if the two mentions are not in an i- within-i construct, 
-  // i.e., one cannot be a child NP in the other’s NP constituent
+  // i.e., one cannot be a child NP in the other's NP constituent
   // private static boolean iWithini (Mention m1, Mention m2) {
   //   Constituent<String> m1Span = new Constituent<String>(m1.headToken().posTag(), m1.beginIndexInclusive, m1.endIndexExclusive);
   //   Constituent<String> m2Span = new Constituent<String>(m2.headToken().posTag(), m2.beginIndexInclusive, m2.endIndexExclusive);
@@ -227,7 +203,7 @@ public class RuleBased implements CoreferenceSystem {
   // }
 
 
-  //Strict Head Matching (pass 3 of http://www.surdeanu.info/mihai/papers/emnlp10.pdf)
+  // Strict Head Matching (pass 3 of http://www.surdeanu.info/mihai/papers/emnlp10.pdf)
   void pass3(HashMap<Mention, ClusteredMention> mentions) {
     for (Mention m1 : mentions.keySet ()) {
       for (Mention m2 : mentions.keySet ()) {
@@ -254,9 +230,7 @@ public class RuleBased implements CoreferenceSystem {
         }
       }
     }
-
   }
-
 
   void pass5(HashMap<Mention, ClusteredMention> mentions) {
     for (Mention m1 : mentions.keySet ()) {
@@ -271,22 +245,4 @@ public class RuleBased implements CoreferenceSystem {
       }
     }
   }
-
-
-  // /**
-  //  * Merges clusters given by two entities in order:
-  //  * We discard the entity of m2 and map all elements in it to the entity of m1.
-  //  * This updates not only m2 but also all other entries in the array of mentions
-  //  * (that m2 presumably comes from) that share an entity with m2.
-  //  */
-  // void mergeClusters(ClusteredMention m1, ClusteredMention m2) {
-  //   // Get an iterator over all the mentions in m2's entity
-  //   // The API we're given unfortunately doesn't allow us to access the mention list
-  //   // directly.
-  //   Iterator<Mention> iterator = m2.entity.iterator();
-  //   while (iterator.hasNext()) {
-  //     Mention m = iterator.next();
-  //     m2.entity.add(m);
-  //   }
-  // }
 }
