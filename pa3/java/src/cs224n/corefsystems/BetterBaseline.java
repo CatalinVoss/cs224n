@@ -30,7 +30,7 @@ public class BetterBaseline implements CoreferenceSystem {
       for (Entity e : clusters) {
         for (Pair<Mention, Mention> mentionPair : e.orderedMentionPairs()) { // iterable and order-sensitive; BA and AB will both show up
           // Exclude he/she/it/etc.
-          //if (!Pronoun.isSomePronoun(mentionPair.getFirst().headWord()) && !Pronoun.isSomePronoun(mentionPair.getSecond().headWord()))
+          // if (!Pronoun.isSomePronoun(mentionPair.getFirst().headWord()) && !Pronoun.isSomePronoun(mentionPair.getSecond().headWord()))
             coreferentHeads.incrementCount(mentionPair.getFirst().headWord(), mentionPair.getSecond().headWord(), 1.0);
         }
       }

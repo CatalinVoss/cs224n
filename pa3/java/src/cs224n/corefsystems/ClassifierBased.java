@@ -37,30 +37,31 @@ public class ClassifierBased implements CoreferenceSystem {
 			 */
 
 			Feature.ExactMatch.class,
-			Feature.NumMentionsToPrev.class,
-			Feature.NumSentenceToPrev.class,
-			Feature.GenderEntityAgreement.class,
-			Feature.CandidateIsPronoun.class,  
-			Feature.OnPrixIsPronoun.class,
-			Feature.MatchingPronouns.class,
-			Feature.CandidateIsName.class,
-			Feature.OnPrixIsName.class,
-			Feature.MatchingNames.class,
-			Feature.OnPrixEntity.class,
-			Feature.CandidateEntity.class,
-			Feature.MatchingEntities.class,
-			Feature.CandidateLemma.class,
-			Feature.OnPrixLemmma.class,
-			Feature.MatchingLemmas.class,
-			Feature.CandidatePos.class,
-			Feature.OnPrixPos.class, 
-			Feature.MatchingPos.class,
-			Feature.ExactHeadMatch.class,
-			Feature.CoreferentHeadCount.class, 
-			//Feature.ClusterHeadMatch.class,
+			// Feature.NumMentionsToPrev.class,
+			// Feature.NumSentenceToPrev.class,
+			// Feature.GenderEntityAgreement.class,
+			// Feature.CandidateIsPronoun.class,  
+			// Feature.OnPrixIsPronoun.class,
+			// Feature.MatchingPronouns.class,
+			// Feature.CandidateIsName.class,
+			// Feature.OnPrixIsName.class,
+			// Feature.MatchingNames.class,
+			// Feature.OnPrixEntity.class,
+			// Feature.CandidateEntity.class,
+			// Feature.MatchingEntities.class,
+			// Feature.CandidateLemma.class,
+			// Feature.OnPrixLemmma.class,
+			// Feature.MatchingLemmas.class,
+			// Feature.CandidatePos.class,
+			// Feature.OnPrixPos.class, 
+			// Feature.MatchingPos.class,
+			// Feature.ExactHeadMatch.class,
+			// Feature.CoreferentHeadCount.class, 
+			// //Feature.ClusterHeadMatch.class,
+			// Feature.SameSpeaker.class,
 
 			//skeleton for how to create a pair feature
-			Pair.make(Feature.ExactHeadMatch.class,	Feature.MatchingPronouns.class),
+			// Pair.make(Feature.ExactHeadMatch.class,	Feature.MatchingPronouns.class),
 	});
 
 	private static int getMentionsToPrev (Mention m1, Mention m2) {
@@ -151,6 +152,8 @@ public class ClassifierBased implements CoreferenceSystem {
 				return new Feature.CoreferentHeadCount((int) coreferentHeads.getCount(onPrix.headToken().toString(), candidate.headToken().toString()));
 			} else if (clazz.equals(Feature.ClusterHeadMatch.class)) {
 				return new Feature.ClusterHeadMatch(clusterHeadMatch(onPrix, candidateCluster));
+			} else if (clazz.equals(Feature.SameSpeaker.class)) {
+				return new Feature.SameSpeaker (onPrix.headToken().speaker().equals(candidate.headToken().speaker()));
 			}
 				//else if(clazz.equals(Feature.NewFeature.class) {
 				/*

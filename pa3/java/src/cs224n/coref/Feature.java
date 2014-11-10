@@ -191,9 +191,12 @@ public interface Feature {
     public ClusterHeadMatch (boolean match) {super(match);}
   }
 
-  //Things to try out: 
+  public static class SameSpeaker extends Indicator {
+    public SameSpeaker (boolean same) {super(same);}
+  }
 
-  //Same speaker
+  // Things to try out: 
+
 
   //word inclusion
 
