@@ -4,7 +4,10 @@ import cs224n.coref.ClusteredMention;
 import cs224n.coref.Document;
 import cs224n.coref.Entity;
 import cs224n.coref.Mention;
+import cs224n.coref.Sentence.Token;
 import cs224n.util.*;
+import cs224n.coref.StopWords;
+import cs224n.ling.*;
 
 import java.util.ArrayList;
 import java.util.*;
@@ -15,12 +18,7 @@ import java.util.*;
 public class RuleBased implements CoreferenceSystem {
   // For each cluster counts the number of headword pairs that appeared together: (A,B,C,D) => AB++, AC++, AD++, BC++, BD++, ... (the transitive closure of this subgraph)
   CounterMap<String, String> coreferentHeads = null;
-   HashMap<Mention, ClusteredMention> clusterMap;
-
-
-  private static final Set<String> kPronouns = new HashSet<String>(Arrays.asList( 
-    new String[] {"he", "she", "it", "they", "them", "that", "this", "we", "us", "you", "her", "him"}
-  ));
+  HashMap<Mention, ClusteredMention> clusterMap;
   private static final Double kCorefHeadThresh = 1.0;
 
 	@Override
@@ -58,10 +56,12 @@ public class RuleBased implements CoreferenceSystem {
       // clusters.add(m.entity);
     }
 
-    // Runn passes of rules
+    // Run passes of rules
     pass1(clusterMap);
-    // pass2(clusterMap);
-    // pass3(clusterMap);
+    // pass2(clusterMap); //eventually should handle apposition, i-within-i, etc.
+    pass3(clusterMap);
+    pass4(clusterMap);
+    pass5(clusterMap);
 
     ArrayList<ClusteredMention> mentions =  new ArrayList<ClusteredMention>(clusterMap.values());
 
@@ -117,12 +117,7 @@ public class RuleBased implements CoreferenceSystem {
   }
 
   void pass1(HashMap<Mention, ClusteredMention> mentions) {
-    // call addAll on entity
-
-    // merge mentions
-
-
-    // Exact match
+  	//stores mapping
     Map<String, Mention> clusters = new HashMap<String, Mention>();
 
     for (Mention m : mentions.keySet()){
@@ -130,7 +125,7 @@ public class RuleBased implements CoreferenceSystem {
       String mentionString = m.gloss();
 
       // If we've seen this text before
-      if (clusters.containsKey(mentionString)){
+      if (clusters.containsKey(mentionString)){     // Exact match
         // Merge mentions
         mergeClusters(m, clusters.get(mentionString));
       } else {
@@ -146,9 +141,137 @@ public class RuleBased implements CoreferenceSystem {
 
   // }
 
-  // void pass3(List<ClusteredMention> mentions) {
-  //   // call addAll on entity
+  //returns true if the mention head word matches any head word in the antecedent
+  private static boolean clusterHeadMatch (Mention m1, ClusteredMention cluster) {
+    String mentionHead = m1.headWord();
+    for (Mention m : cluster.entity.mentions) {
+      if (m.headWord().equals(mentionHead)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  //returns true if all of the non-stop words in the mention cluster are
+  //included in the non-stop words of the antecedent cluster 
+  private static boolean wordInclusion(ClusteredMention m1, ClusteredMention m2) {
+    HashSet<String> m2Words = new HashSet<String>();
+    for(Mention m : m2.entity.mentions) {
+      for (String word : m.text()) {
+        if (!StopWords.isSomeStopWord(word)) {
+          m2Words.add(word);
+        }
+      }
+    }
+
+
+    for (Mention mention : m1.entity.mentions) {
+      for (String word : mention.text()) {
+        if (!StopWords.isSomeStopWord(word) && !m2Words.contains(word)) {
+          return false;
+        }
+      }
+    }
+
+    return true;  
+  }
+
+  private static boolean isAdj (Token t) {
+    String tag = t.posTag();
+    return tag.equals ("JJ") || tag.equals ("JJR") || tag.equals("JJS");
+  }
+
+  //return true if the mention’s modifiers are all included in the modifiers 
+  //of the antecedent candidate
+  private static boolean compatibleModifiers(Mention m1, Mention m2) {
+    //only nouns or adjectives
+    List<Token> m1Tokens = m1.sentence.tokens.subList(m1.beginIndexInclusive, m1.endIndexExclusive);
+    List<Token> m2Tokens = m2.sentence.tokens.subList(m2.beginIndexInclusive, m2.endIndexExclusive);
+
+    for(Token tok : m1Tokens) {
+      if ((tok.isNoun() || isAdj(tok)) && !m2Tokens.contains(tok)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  //TODO: THIS DOESN'T ACTUALLY WORK RIGHT NOW!
+  // returns true if the two mentions are not in an i- within-i construct, 
+  // i.e., one cannot be a child NP in the other’s NP constituent
+  // private static boolean iWithini (Mention m1, Mention m2) {
+  //   Constituent<String> m1Span = new Constituent<String>(m1.headToken().posTag(), m1.beginIndexInclusive, m1.endIndexExclusive);
+  //   Constituent<String> m2Span = new Constituent<String>(m2.headToken().posTag(), m2.beginIndexInclusive, m2.endIndexExclusive);
+
+
+  //   List<Constituent<String>> m1Consituents =   m1.parse.toConstituentList();
+  //   for (Constituent<String> constit : m1Consituents) {
+  //     if (constit == m1Span) {
+  //       System.out.println ("This actually worked")
+  //       return false;
+  //     }
+  //   }
+
+  //   List<Constituent<String>> m2Consituents =   m2.parse.toConstituentList();
+  //   for (Constituent<String> constit : m2Consituents) {
+  //     if (constit == m2Span) {
+  //       return false;
+  //     }
+  //   }
+
+
+  //   return true;
+
+  //   // List<Constituent<String>> m2Consituents =  parse2.toConstituentList();
+
   // }
+
+
+  //Strict Head Matching (pass 3 of http://www.surdeanu.info/mihai/papers/emnlp10.pdf)
+  void pass3(HashMap<Mention, ClusteredMention> mentions) {
+    for (Mention m1 : mentions.keySet ()) {
+      for (Mention m2 : mentions.keySet ()) {
+        if (clusterHeadMatch(m1, mentions.get(m2))) {
+          if (wordInclusion (mentions.get(m1), mentions.get(m2))) {
+            if (compatibleModifiers(m1, m2)) {
+              //if (!iWithini(m1, m2)) {
+                mergeClusters(m1, m2);
+              //}
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void pass4(HashMap<Mention, ClusteredMention> mentions) {
+     for (Mention m1 : mentions.keySet ()) {
+      for (Mention m2 : mentions.keySet ()) {
+        if (clusterHeadMatch(m1, mentions.get(m2))) {
+          if (wordInclusion (mentions.get(m1), mentions.get(m2))) {
+                mergeClusters(m1, m2);
+          }
+        }
+      }
+    }
+
+  }
+
+
+  void pass5(HashMap<Mention, ClusteredMention> mentions) {
+    for (Mention m1 : mentions.keySet ()) {
+      for (Mention m2 : mentions.keySet ()) {
+        if (clusterHeadMatch(m1, mentions.get(m2))) {
+          if (compatibleModifiers(m1, m2)) {
+              //if (!iWithini(m1, m2)) {
+              mergeClusters(m1, m2);
+              //}
+          }
+        }
+      }
+    }
+  }
+
 
   // /**
   //  * Merges clusters given by two entities in order:
@@ -166,5 +289,4 @@ public class RuleBased implements CoreferenceSystem {
   //     m2.entity.add(m);
   //   }
   // }
-
 }
