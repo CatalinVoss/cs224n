@@ -101,9 +101,101 @@ public interface Feature {
     public ExactMatch(boolean exactMatch){ super(exactMatch); }
   }
   
-  // public static class NumWordsToPrev extends IntIndicator {
-  //   public NumWordToPrev(int numWordsToPrev) { super(numWordsToPrev); }
-  // }
+  public static class NumMentionsToPrev extends IntIndicator {
+    public NumMentionsToPrev(int numMentionsToPrev) { super(numMentionsToPrev); }
+  }
+
+  public static class NumSentenceToPrev extends IntIndicator {
+    public NumSentenceToPrev (int numSentenceToPrev) { super(numSentenceToPrev); }
+  }
+
+  public static class GenderEntityAgreement extends Indicator {
+    public GenderEntityAgreement(boolean genderEntityAgreement) {super(genderEntityAgreement); }
+  }
+
+  public static class CandidateIsPronoun extends Indicator {
+    public CandidateIsPronoun(boolean isPronoun) {super(isPronoun); }
+  }
+
+  public static class OnPrixIsPronoun extends Indicator {
+    public OnPrixIsPronoun (boolean isPronoun) {super(isPronoun); }
+  } 
+
+  public static class MatchingPronouns extends Indicator {
+    public MatchingPronouns (boolean bothPronouns) { super(bothPronouns); }
+  }
+
+  public static class CandidateIsName extends Indicator {
+    public CandidateIsName(boolean candidateIsName) { super(candidateIsName); }
+  }
+
+  public static class OnPrixIsName extends Indicator {
+    public OnPrixIsName (boolean onPrixIsName) { super(onPrixIsName); }
+  }
+
+  public static class MatchingNames extends Indicator {
+    public MatchingNames (boolean bothNames) {super(bothNames); }
+  }
+
+  public static class CandidateEntity extends StringIndicator {
+    public CandidateEntity (String candEntity) { super(candEntity); }
+  }
+
+  public static class OnPrixEntity extends StringIndicator {
+    public OnPrixEntity (String onPrixEntity) { super(onPrixEntity); }
+  }
+
+
+  public static class MatchingEntities extends Indicator {
+    public MatchingEntities (boolean match)  { super(match); }
+  }
+
+  public static class CandidateLemma extends StringIndicator {
+    public CandidateLemma (String candidateLemma) { super(candidateLemma); }
+  }
+
+  public static class OnPrixLemmma extends StringIndicator {
+    public OnPrixLemmma (String onPrixLemmma) { super(onPrixLemmma); }
+  }
+
+
+  public static class MatchingLemmas extends Indicator {
+    public MatchingLemmas (boolean match)  { super(match); }
+  }
+
+  public static class CandidatePos extends StringIndicator {
+    public CandidatePos (String candidatePos) { super(candidatePos); }
+  }
+
+  public static class OnPrixPos extends StringIndicator {
+    public OnPrixPos (String onPrixPos) { super(onPrixPos); }
+  }
+
+  public static class MatchingPos extends Indicator {
+    public MatchingPos (boolean match)  { super(match); }
+  }
+
+  public static class ExactHeadMatch extends Indicator {
+    public ExactHeadMatch (boolean match) {super(match);}
+  }
+
+  public static class CoreferentHeadCount extends IntIndicator {
+    public CoreferentHeadCount (int numReferences) {super(numReferences);}
+  }
+
+  public static class MatchingNotPronoun extends PairFeature {
+    public MatchingNotPronoun (Feature exactHeadMatch, Feature candidateIsPronoun) {super(exactHeadMatch, candidateIsPronoun);}
+  }
+
+  public static class ClusterHeadMatch extends Indicator {
+    public ClusterHeadMatch (boolean match) {super(match);}
+  }
+
+  //Things to try out: 
+
+  //Same speaker
+
+  //word inclusion
 
   /*
    * TODO: Add values to the indicators here.
