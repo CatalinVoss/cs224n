@@ -8,17 +8,22 @@ import cs224n.coref.Sentence.Token;
 import cs224n.util.*;
 import cs224n.coref.StopWords;
 import cs224n.ling.*;
+import cs224n.coref.Pronoun;
+import cs224n.coref.Util;
 
 import java.util.ArrayList;
 import java.util.*;
 
 /**
- * Pass-based parser
+ * Multi-pass sieve parser
+ * 
+ * Partially inspired by the multi-pass sieve parser of Raghunathan et. al.
+ * http://www.surdeanu.info/mihai/papers/emnlp10.pdf
+ *
  */
 public class RuleBased implements CoreferenceSystem {
-  // For each cluster counts the number of headword pairs that appeared together: (A,B,C,D) => AB++, AC++, AD++, BC++, BD++, ... (the transitive closure of this subgraph)
-  CounterMap<String, String> coreferentHeads = null;
   HashMap<Mention, ClusteredMention> clusterMap;
+  CounterMap<String, String> coreferentHeads = null;
   private static final Double kCorefHeadThresh = 1.0;
 
 	@Override
@@ -30,13 +35,12 @@ public class RuleBased implements CoreferenceSystem {
       List<Entity> clusters = pair.getSecond();
       List<Mention> mentions = doc.getMentions();
 
-      // System.out.println(doc.prettyPrint(clusters));
-
       // For all coreferent mention pairs
       for (Entity e : clusters) {
         for (Pair<Mention, Mention> mentionPair : e.orderedMentionPairs()) { // iterable and order-sensitive; BA and AB will both show up
           // Exclude he/she/it/etc.
-          coreferentHeads.incrementCount(mentionPair.getFirst().headWord(), mentionPair.getSecond().headWord(), 1.0);
+          // if (!Pronoun.isSomePronoun(mentionPair.getFirst().headWord()) && !Pronoun.isSomePronoun(mentionPair.getSecond().headWord()))
+            coreferentHeads.incrementCount(mentionPair.getFirst().headWord(), mentionPair.getSecond().headWord(), 1.0);
         }
       }
     }
@@ -44,40 +48,28 @@ public class RuleBased implements CoreferenceSystem {
 
 	@Override
 	public List<ClusteredMention> runCoreference(Document doc) {
-    // Turn all the mentions into a list of clusters (singletons to start with)
-    // List<Entity> clusters = new ArrayList();
+    //put all mentions into map as singleton clusters
     clusterMap = new HashMap<Mention, ClusteredMention>();
     for (Mention m : doc.getMentions()) {
-      // Create a singleton entity
-      // These have to occur in order that they appear text wise. In later phases we will make
-      // use of the fact that all of the phases keep the entity order consistent, that is that
-      // if we add two components we will create links to the first one.
       clusterMap.put(m, m.markSingleton());
-      // clusters.add(m.entity);
     }
 
-    // Run passes of rules
-    pass1(clusterMap);
-    // pass2(clusterMap); //eventually should handle apposition, i-within-i, etc.
-    pass3(clusterMap);
-    pass4(clusterMap);
-    pass5(clusterMap);
+    // Run multi-layer sieve
+    pass1(clusterMap); // Exact match
+    pass2(clusterMap); // Hobbs algorithm
+    pass3(clusterMap); // Strict head matching
+    pass4(clusterMap); // Head matching with relaxed compatible modifiers
+    pass5(clusterMap); // Head matching with relaxed word inclusion
 
+    /* Not included in the final system to improve B3 performance */
+    // pass6(clusterMap); //Observed coreferent head matching
+
+    pass7(clusterMap); // Mention resolution
+    pass8(clusterMap); // pronouns
+    
     ArrayList<ClusteredMention> mentions =  new ArrayList<ClusteredMention>(clusterMap.values());
 
     return mentions;
-
-    // // Create returnable mentions from the clusters
-    // for (Entity e : clusters) {
-    //   Iterator<Mention> iterator = e.iterator();
-    //   while (iterator.hasNext()) {
-    //     // Make clustered mention
-    //     ClusteredMention clustered = new ClusteredMention(iterator.next(), e);
-    //     // TODO: the e's here only have the cluster mentions as children. Perhaps re-add the entire document if the testing code expects that.
-    //     mentions.add(clustered);
-    //   }
-    // }
-    // // TODO: if this doesn't work well enough then only consider text-wise first word of any cluster in subsequent phases
   }
 
   /**
@@ -113,10 +105,18 @@ public class RuleBased implements CoreferenceSystem {
 
   }
 
-  // void pass2(List<ClusteredMention> mentions) {
-  //   // call addAll on entity
-
-  // }
+   //runs Hobbs algorithm
+  void pass2(HashMap<Mention, ClusteredMention> mentions) {
+    for (Mention m1 : mentions.keySet()) {
+      for (Mention m2 : mentions.keySet()) {
+        if ((m1 == m2) || (m1.doc.indexOfMention(m1) > m1.doc.indexOfMention(m2)))
+          continue;
+        if (HobbsResolver.matchesMentions(m1, m2)) {
+          mergeClusters (m1, m2);
+        }
+      }
+    }
+  }
 
   //returns true if the mention head word matches any head word in the antecedent
   private static boolean clusterHeadMatch (Mention m1, ClusteredMention cluster) {
@@ -132,6 +132,8 @@ public class RuleBased implements CoreferenceSystem {
   //returns true if all of the non-stop words in the mention cluster are
   //included in the non-stop words of the antecedent cluster 
   private static boolean wordInclusion(ClusteredMention m1, ClusteredMention m2) {
+    
+    //get all nonstop words in the antecedent cluster
     HashSet<String> m2Words = new HashSet<String>();
     for (Mention m : m2.entity.mentions) {
       for (String word : m.text()) {
@@ -141,6 +143,7 @@ public class RuleBased implements CoreferenceSystem {
       }
     }
 
+    //check if any nonstop words of the mention appear in the antecedent
     for (Mention mention : m1.entity.mentions) {
       for (String word : mention.text()) {
         if (!StopWords.isSomeStopWord(word) && !m2Words.contains(word)) {
@@ -172,47 +175,15 @@ public class RuleBased implements CoreferenceSystem {
     return true;
   }
 
-  //TODO: THIS DOESN'T ACTUALLY WORK RIGHT NOW!
-  // returns true if the two mentions are not in an i- within-i construct, 
-  // i.e., one cannot be a child NP in the other's NP constituent
-  // private static boolean iWithini (Mention m1, Mention m2) {
-  //   Constituent<String> m1Span = new Constituent<String>(m1.headToken().posTag(), m1.beginIndexInclusive, m1.endIndexExclusive);
-  //   Constituent<String> m2Span = new Constituent<String>(m2.headToken().posTag(), m2.beginIndexInclusive, m2.endIndexExclusive);
-
-
-  //   List<Constituent<String>> m1Consituents =   m1.parse.toConstituentList();
-  //   for (Constituent<String> constit : m1Consituents) {
-  //     if (constit == m1Span) {
-  //       System.out.println ("This actually worked")
-  //       return false;
-  //     }
-  //   }
-
-  //   List<Constituent<String>> m2Consituents =   m2.parse.toConstituentList();
-  //   for (Constituent<String> constit : m2Consituents) {
-  //     if (constit == m2Span) {
-  //       return false;
-  //     }
-  //   }
-
-
-  //   return true;
-
-  //   // List<Constituent<String>> m2Consituents =  parse2.toConstituentList();
-
-  // }
-
-
-  // Strict Head Matching (pass 3 of http://www.surdeanu.info/mihai/papers/emnlp10.pdf)
+  // Strict Head Matching... enforces clusterHeadMatch, compatible modifiers
+  // and word inclusion
   void pass3(HashMap<Mention, ClusteredMention> mentions) {
     for (Mention m1 : mentions.keySet ()) {
       for (Mention m2 : mentions.keySet ()) {
         if (clusterHeadMatch(m1, mentions.get(m2))) {
           if (wordInclusion (mentions.get(m1), mentions.get(m2))) {
             if (compatibleModifiers(m1, m2)) {
-              //if (!iWithini(m1, m2)) {
                 mergeClusters(m1, m2);
-              //}
             }
           }
         }
@@ -220,6 +191,7 @@ public class RuleBased implements CoreferenceSystem {
     }
   }
 
+  //Head matching... relaxes compatible modifier constraint for head matching
   void pass4(HashMap<Mention, ClusteredMention> mentions) {
      for (Mention m1 : mentions.keySet ()) {
       for (Mention m2 : mentions.keySet ()) {
@@ -232,15 +204,89 @@ public class RuleBased implements CoreferenceSystem {
     }
   }
 
+  //Head matching.... relaxes word inclusion constraint
   void pass5(HashMap<Mention, ClusteredMention> mentions) {
     for (Mention m1 : mentions.keySet ()) {
       for (Mention m2 : mentions.keySet ()) {
         if (clusterHeadMatch(m1, mentions.get(m2))) {
-          if (compatibleModifiers(m1, m2)) {
-              //if (!iWithini(m1, m2)) {
-              mergeClusters(m1, m2);
-              //}
-          }
+          mergeClusters(m1, m2);
+        }
+      }
+    }
+  }
+
+  //returns true iff both agree on gender, number, person, named entity, and lemma
+  boolean mentionsAgree (Mention m1, Mention m2) {
+    Pair<Boolean,Boolean> gender = Util.haveGenderAndAreSameGender (m1, m2);
+    Pair<Boolean,Boolean> number = Util.haveNumberAndAreSameNumber (m1, m2);
+
+    boolean genderAgree = (gender.getFirst() && gender.getSecond()) || !gender.getFirst();
+    boolean numberAgree = (number.getFirst() && number.getSecond()) || !number.getFirst();
+  
+    boolean personAgree = true;
+    if (Pronoun.isSomePronoun(m1.gloss()) && Pronoun.isSomePronoun(m2.gloss())) {
+      if (!(m1.headToken().isQuoted() || m2.headToken().isQuoted())) {
+        Pronoun p1 = Pronoun.valueOrNull(m1.gloss());
+        Pronoun p2 = Pronoun.valueOrNull(m2.gloss());
+        if (p1 != null && p2 != null) {
+          personAgree = (p1.speaker == p2.speaker);
+        }
+      }
+    }
+
+    boolean nerAgree = m1.headToken().nerTag().equals(m2.headToken().nerTag());
+    boolean lemmasAgree = m1.headToken().lemma().equals(m2.headToken().lemma());
+
+    return genderAgree && numberAgree && personAgree && nerAgree && lemmasAgree;
+  
+  }
+
+  boolean observedHeadPair (Mention m1, Mention m2) {
+    return coreferentHeads.getCount(m1.headWord(), m2.headWord()) > kCorefHeadThresh;
+  }
+
+  void pass6(HashMap<Mention, ClusteredMention> mentions) {
+    for (Mention m1 : mentions.keySet()) {
+      for (Mention m2 : mentions.keySet()) {
+        if (observedHeadPair(m1, m2)) {
+           mergeClusters(m1, m2);
+        }
+      }
+    }
+  }
+
+  //mention matching... merges clusters if two mentions satisfy mention agreement
+  //requirements for gender, number, person, ner, and lemma
+  void pass7(HashMap<Mention, ClusteredMention> mentions) {
+    for (Mention m1 : mentions.keySet()) {
+      for (Mention m2 : mentions.keySet()) {
+        if (mentionsAgree(m1, m2)){
+          mergeClusters(m1, m2);
+        }
+      }
+    }
+  }
+
+   //return true if the pronouns agree
+  boolean pronounsAgree (Mention m1, Mention m2) {
+    Pronoun p1 = Pronoun.valueOrNull(m1.gloss());
+    Pronoun p2 = Pronoun.valueOrNull(m2.gloss());
+    if (p1 == null || p2 == null) {
+      return false;
+    }
+
+    return p1.gender == p2.gender && p1.speaker == p2.speaker && p1.plural == p2.plural;
+  }
+
+  //pronoun specific matching... merges two pronouns if they have the same
+  //gender, speaker, and number (e.g. is plural)
+  void pass8(HashMap<Mention, ClusteredMention> mentions) {
+    for (Mention m1 : mentions.keySet()) {
+      for (Mention m2 : mentions.keySet()) {
+        if (Pronoun.isSomePronoun(m1.gloss()) && Pronoun.isSomePronoun(m2.gloss())) {
+          if (pronounsAgree(m1, m2)){
+            mergeClusters(m1, m2);
+          } 
         }
       }
     }

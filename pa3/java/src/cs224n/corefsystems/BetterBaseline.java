@@ -24,8 +24,6 @@ public class BetterBaseline implements CoreferenceSystem {
       List<Entity> clusters = pair.getSecond();
       List<Mention> mentions = doc.getMentions();
 
-                     // System.out.println(doc.prettyPrint(clusters));
-
       // For all coreferent mention pairs
       for (Entity e : clusters) {
         for (Pair<Mention, Mention> mentionPair : e.orderedMentionPairs()) { // iterable and order-sensitive; BA and AB will both show up

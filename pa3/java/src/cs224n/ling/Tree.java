@@ -20,14 +20,17 @@ public class Tree<L> implements Serializable, Decodable {
 
   private L label;
   private List<Tree<L>> children;
-  public int uniqueIndex = nextUniqueIndex++;
-
+  private int uniqueIndex = nextUniqueIndex++;
+  public Tree<L> parent = null; // parent pointer (by reference)
 
   public List<Tree<L>> getChildren() {
     return children;
   }
   public void setChildren(List<Tree<L>> children) {
     this.children = children;
+    for (Tree<L> child : children) {
+      child.parent = this;
+    }
   }
   public L getLabel() {
     return label;
@@ -35,6 +38,19 @@ public class Tree<L> implements Serializable, Decodable {
   public void setLabel(L label) {
     this.label = label;
   }
+
+  public void annotateParents() {
+    // System.out.print("Annotating");
+    for (Tree<L> child : children) {
+      child.parent = this;
+      child.annotateParents();
+    }
+    // for (Tree<L> child : getChildren()) {
+    //   System.out.print("changes successfully:"+child.parent.toString());
+    //   //child.annotateParents();
+    // }
+  }
+
 
   /* Returns true at the word(leaf) level of a tree */
   public boolean isLeaf() {
@@ -313,6 +329,7 @@ public class Tree<L> implements Serializable, Decodable {
     //(get children)
     while(pos < encoded.length && encoded[pos] != ')'){
       Pair<Tree<String>, Integer> childPair = decodeTree(encoded, pos, depth);
+      // childPair.getFirst().parent = this; // TODO: check this
       children.add(childPair.getFirst());
       pos = childPair.getSecond();
     }
@@ -336,7 +353,17 @@ public class Tree<L> implements Serializable, Decodable {
       return Pair.make(new Tree<String>(head.toString()),pos);
     } else {
       Pair<ArrayList<Tree<String>>, Integer> childrenPair = decodeChildren(encoded, pos, depth+1);
-      return Pair.make(new Tree<String>(head.toString(),childrenPair.getFirst()),childrenPair.getSecond());
+      Tree<String> tree = new Tree<String>(head.toString(),childrenPair.getFirst());
+      // System.out.print("Making tree?");
+      for (Tree<String> child : tree.children) {
+              // System.out.print("assigning parent");
+        child.parent = tree;
+      }
+      for (Tree<String> child : tree.children) {
+              // System.out.print("assigning parent");
+        child.parent = tree;
+      }
+      return Pair.make(tree,childrenPair.getSecond());
     }
   }
   public static Tree<String> decode(String encoded){

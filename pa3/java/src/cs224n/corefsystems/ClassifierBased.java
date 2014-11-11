@@ -11,6 +11,7 @@ import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 import cs224n.util.*;
+import cs224n.corefsystems.HobbsResolver;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -37,42 +38,49 @@ public class ClassifierBased implements CoreferenceSystem {
 			 */
 
 			Feature.ExactMatch.class,
-			// Feature.NumMentionsToPrev.class,
-			// Feature.NumSentenceToPrev.class,
+			Feature.NumMentionsToPrev.class,
+			Feature.NumSentenceToPrev.class,
+			Feature.CandidateIsPronoun.class,  
+			Feature.OnPrixIsPronoun.class,
+			Feature.MatchingPronouns.class,
+			Feature.CandidateIsName.class,
+			Feature.OnPrixIsName.class,
+			Feature.MatchingNames.class,
+			Feature.OnPrixEntity.class,
+			Feature.CandidateEntity.class,
+			Feature.MatchingEntities.class,
+			Feature.CandidateLemma.class,
+			Feature.OnPrixLemmma.class,
+			Feature.MatchingLemmas.class,
+			Feature.CandidatePos.class,
+			Feature.OnPrixPos.class, 
+			Feature.MatchingPos.class,
+			Feature.ExactHeadMatch.class,
+			Feature.CoreferentHeadCount.class, 
+			Feature.SameSpeaker.class,
+
+			Pair.make(Feature.ExactHeadMatch.class,	Feature.MatchingPronouns.class),
+
+	
+			
+			Feature.Hobbs.class, //added after classifer results reported
+			/* Removed to improve performance */
 			// Feature.GenderEntityAgreement.class,
-			// Feature.CandidateIsPronoun.class,  
-			// Feature.OnPrixIsPronoun.class,
-			// Feature.MatchingPronouns.class,
-			// Feature.CandidateIsName.class,
-			// Feature.OnPrixIsName.class,
-			// Feature.MatchingNames.class,
-			// Feature.OnPrixEntity.class,
-			// Feature.CandidateEntity.class,
-			// Feature.MatchingEntities.class,
-			// Feature.CandidateLemma.class,
-			// Feature.OnPrixLemmma.class,
-			// Feature.MatchingLemmas.class,
-			// Feature.CandidatePos.class,
-			// Feature.OnPrixPos.class, 
-			// Feature.MatchingPos.class,
-			// Feature.ExactHeadMatch.class,
-			// Feature.CoreferentHeadCount.class, 
-			// //Feature.ClusterHeadMatch.class,
-			// Feature.SameSpeaker.class,
-
-			//skeleton for how to create a pair feature
-			// Pair.make(Feature.ExactHeadMatch.class,	Feature.MatchingPronouns.class),
+			// Feature.ClusterHeadMatch.class,
 	});
-
+	
+	/* Number of mentions between M1 and M2 */
 	private static int getMentionsToPrev (Mention m1, Mention m2) {
 		return m1.doc.indexOfMention(m2) - m1.doc.indexOfMention(m1);
 	}
 
+	/* number of sentences between M1 and M2 */
 	private static int getSentencesToPrev (Mention m1, Mention m2) {
 		List<Sentence> sentenceList = m1.doc.sentences;
 		return sentenceList.indexOf(m2.sentence) - sentenceList.indexOf(m1.sentence);
 	}
 
+	/* M and all the mentions in ENTITY agree on gender. */
 	private static boolean genderEntityAgreement (Mention m, Entity entity) {
 		Pair<Boolean, Boolean> pair =  Util.haveGenderAndAreSameGender(m, entity);
 		return pair.getFirst() && pair.getSecond();
@@ -106,60 +114,81 @@ public class ClassifierBased implements CoreferenceSystem {
 			Entity candidateCluster = input.getSecond().entity; //the cluster containing the second mention
 
 
-			//--Features
+			//--Features... see Feature.java for a description of features
 			if(clazz.equals(Feature.ExactMatch.class)){
 				//(exact string match)
 				return new Feature.ExactMatch(onPrix.gloss().equals(candidate.gloss()));
+
 			} else if (clazz.equals(Feature.NumMentionsToPrev.class)) {
 				return new Feature.NumMentionsToPrev(getMentionsToPrev(onPrix, candidate));
+
 			} else if (clazz.equals(Feature.NumSentenceToPrev.class)) {
 				return new Feature.NumSentenceToPrev(getSentencesToPrev(onPrix, candidate));
+
 			} else if (clazz.equals(Feature.GenderEntityAgreement.class)) {
 				return new Feature.GenderEntityAgreement(genderEntityAgreement(onPrix, candidateCluster));
+
 			} else if (clazz.equals(Feature.CandidateIsPronoun.class)) {
 				return new Feature.CandidateIsPronoun(Pronoun.isSomePronoun(candidate.gloss()));
+
 			} else if (clazz.equals(Feature.OnPrixIsPronoun.class)) {
 				return new Feature.OnPrixIsPronoun(Pronoun.isSomePronoun(onPrix.gloss()));
+
 			} else if (clazz.equals(Feature.MatchingPronouns.class)) {
 				return new Feature.MatchingPronouns(Pronoun.isSomePronoun(onPrix.gloss()) == Pronoun.isSomePronoun(candidate.gloss()));
+
 			} else if (clazz.equals(Feature.CandidateIsName.class)) {
 				return new Feature.CandidateIsName(Name.isName(candidate.gloss()));
+
 			} else if (clazz.equals(Feature.OnPrixIsName.class)) {
 				return new Feature.OnPrixIsName(Name.isName(onPrix.gloss()));
+
 			} else if (clazz.equals(Feature.MatchingNames.class)) {
 				return new Feature.MatchingNames(Name.isName(candidate.gloss()) == Name.isName(onPrix.gloss()));
+
 			} else if (clazz.equals(Feature.OnPrixEntity.class)) {
 				return new Feature.OnPrixEntity(onPrix.headToken().nerTag());
+
 			} else if (clazz.equals(Feature.CandidateEntity.class)) {
 				return new Feature.CandidateEntity(candidate.headToken().nerTag());
+
 			} else if (clazz.equals(Feature.MatchingEntities.class)) {
 				return new Feature.MatchingEntities(candidate.headToken().nerTag().equals(onPrix.headToken().nerTag()));
+
 			} else if (clazz.equals(Feature.CandidateLemma.class)) {
 				return new Feature.CandidateLemma(candidate.headToken().lemma());
+
 			} else if (clazz.equals(Feature.OnPrixLemmma.class)) {
 				return new Feature.OnPrixLemmma(onPrix.headToken().lemma());
+
 			} else if (clazz.equals(Feature.MatchingLemmas.class)) {
 				return new Feature.MatchingLemmas(onPrix.headToken().lemma().equals(candidate.headToken().lemma()));
+
 			} else if (clazz.equals(Feature.CandidatePos.class)) {
 				return new Feature.CandidatePos(candidate.headToken().posTag());
+
 			} else if (clazz.equals(Feature.OnPrixPos.class)) {
 				return new Feature.OnPrixPos(onPrix.headToken().posTag());
+
 			} else if (clazz.equals(Feature.MatchingPos.class)) {
 				return new Feature.MatchingPos(onPrix.headToken().posTag().equals(candidate.headToken().posTag()));
+
 			} else if (clazz.equals(Feature.ExactHeadMatch.class)) {
 				return new Feature.ExactHeadMatch(onPrix.headToken().equals(candidate.headToken()));
+
 			} else if (clazz.equals(Feature.CoreferentHeadCount.class)) {
 				return new Feature.CoreferentHeadCount((int) coreferentHeads.getCount(onPrix.headToken().toString(), candidate.headToken().toString()));
+
 			} else if (clazz.equals(Feature.ClusterHeadMatch.class)) {
 				return new Feature.ClusterHeadMatch(clusterHeadMatch(onPrix, candidateCluster));
+
 			} else if (clazz.equals(Feature.SameSpeaker.class)) {
 				return new Feature.SameSpeaker (onPrix.headToken().speaker().equals(candidate.headToken().speaker()));
-			}
-				//else if(clazz.equals(Feature.NewFeature.class) {
-				/*
-				 * TODO: Add features to return for specific classes. Implement calculating values of features here.
-				 */
-			else {
+
+			} else if (clazz.equals(Feature.Hobbs.class)){
+				return new Feature.Hobbs(HobbsResolver.matchesMentions(onPrix, candidate));
+
+			} else {
 				throw new IllegalArgumentException("Unregistered feature: " + clazz);
 			}
 		}
@@ -267,11 +296,11 @@ public class ClassifierBased implements CoreferenceSystem {
 		Set<Boolean> labels = new HashSet<Boolean>();
 		labels.add(true);
 		//(print features)
-		for(Triple<Feature,Boolean,Double> featureInfo : this.classifier.getTopFeatures(labels, 0.0, true, 10000, true)){
+		for(Triple<Feature,Boolean,Double> featureInfo : this.classifier.getTopFeatures(labels, 0.0, true, 10, true)){
 			Feature feature = featureInfo.first();
 			Boolean label = featureInfo.second();
 			Double magnitude = featureInfo.third();
-			log(FORCE,new DecimalFormat("0.000").format(magnitude) + " [" + label + "] " + feature);
+			// log(FORCE,new DecimalFormat("0.000").format(magnitude) + " [" + label + "] " + feature);
 		}
 		end_Track("Features");
 		endTrack("Training");
