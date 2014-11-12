@@ -61,8 +61,8 @@ public class RuleBased implements CoreferenceSystem {
     pass4(clusterMap); // Head matching with relaxed compatible modifiers
     pass5(clusterMap); // Head matching with relaxed word inclusion
 
-    /* Not included in the final system to improve B3 performance */
-    // pass6(clusterMap); //Observed coreferent head matching
+    // /* Not included in the final system to improve B3 performance */
+    // // pass6(clusterMap); //Observed coreferent head matching
 
     pass7(clusterMap); // Mention resolution
     pass8(clusterMap); // pronouns
