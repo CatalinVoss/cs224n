@@ -50,9 +50,4 @@ if __name__ == '__main__':
 		for t in bigrams:
 			f.write(t+' '+str(bigrams[t])+'\n')
 
-	# TODO: Augment vocab files if required
-
 	print 'Done processing corpus'
-
-	# Run GloVe
-
