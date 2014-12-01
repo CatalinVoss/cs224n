@@ -2,7 +2,18 @@
 
 import numpy as np
 
+def get_matrix (vecs):
+	print "Constructing data matrix"
+	wordVecsMatrix = [];
+	labels = [];
+	for key in vecs:
+		labels.append(key);
+		wordVecsMatrix.append(vecs[key])
+
+	return labels, np.matrix(wordVecsMatrix)
+
 def load(filename):
+	print "Loading word vectors"
 	word_vectors = {};
 	f = open (filename)
 
