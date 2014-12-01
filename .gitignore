@@ -1,2 +1,5 @@
 final_project/bigramify/evaluate/._construct_matrices.py
 final_project/glove/.__afs99EB
+final_project/glove/data/*
+final_project/glove/overflow_*
+final_project/glove/.*
