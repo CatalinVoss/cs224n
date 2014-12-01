@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdbool.h>
 
 #define TSIZE 1048576
 #define SEED 1159241
@@ -47,7 +48,7 @@ typedef struct cooccur_rec_id {
 } CRECID;
 
 typedef struct hashrec {
-    char	*word;
+    char    *word;
     long long id;
     struct hashrec *next;
 } HASHREC;
@@ -79,7 +80,7 @@ unsigned int bitwisehash(char *word, int tsize, unsigned int seed) {
 
 /* Create hash table, initialise pointers to NULL */
 HASHREC ** inithashtable() {
-    int	i;
+    int i;
     HASHREC **ht;
     ht = (HASHREC **) malloc( sizeof(HASHREC *) * TSIZE );
     for(i = 0; i < TSIZE; i++) ht[i] = (HASHREC *) NULL;
@@ -88,7 +89,7 @@ HASHREC ** inithashtable() {
 
 /* Search hash table for given string, return record if found, else NULL */
 HASHREC *hashsearch(HASHREC **ht, char *w) {
-    HASHREC	*htmp, *hprv;
+    HASHREC *htmp, *hprv;
     unsigned int hval = HASHFN(w, TSIZE, SEED);
     for(hprv = NULL, htmp=ht[hval]; htmp != NULL && scmp(htmp->word, w) != 0; hprv = htmp, htmp = htmp->next);
     if( htmp != NULL && hprv!=NULL ) { // move to front on access
@@ -101,7 +102,7 @@ HASHREC *hashsearch(HASHREC **ht, char *w) {
 
 /* Insert string in hash table, check for duplicates which should be absent */
 void hashinsert(HASHREC **ht, char *w, long long id) {
-    HASHREC	*htmp, *hprv;
+    HASHREC *htmp, *hprv;
     unsigned int hval = HASHFN(w, TSIZE, SEED);
     for(hprv = NULL, htmp = ht[hval]; htmp != NULL && scmp(htmp->word, w) != 0; hprv = htmp, htmp = htmp->next);
     if(htmp == NULL) {
@@ -276,6 +277,9 @@ int merge_files(int num) {
     fprintf(stderr,"\n");
     return 0;
 }
+bool isBigram (char *token) {
+    return strstr(token, "_") != NULL;
+}
 
 /* Collect word-word cooccurrence counts from input stream */
 int get_cooccurrence() {
@@ -287,6 +291,13 @@ int get_cooccurrence() {
     HASHREC *htmp, **vocab_hash = inithashtable();
     CREC *cr = malloc(sizeof(CREC) * (overflow_length + 1));
     history = malloc(sizeof(long long) * window_size);
+
+    bool *bigram_history = (bool*) malloc (sizeof(bool) * window_size);
+    int i;
+    for (i = 0; i < window_size; i++) {
+        bigram_history[i] = false;
+    }
+
     
     fprintf(stderr, "COUNTING COOCCURRENCES\n");
     if(verbose > 0) {
@@ -351,26 +362,70 @@ int get_cooccurrence() {
         htmp = hashsearch(vocab_hash, str);
         if (htmp == NULL) continue; // Skip out-of-vocabulary words
         w2 = htmp->id; // Target word (frequency rank)
+        long long nb = 0;
         for(k = j - 1; k >= ( (j > window_size) ? j - window_size : 0 ); k--) { // Iterate over all words to the left of target word, but not past beginning of line
             w1 = history[k % window_size]; // Context word (frequency rank)
             if ( w1 < max_product/w2 ) { // Product is small enough to store in a full array
-                bigram_table[lookup[w1-1] + w2 - 2] += 1.0/((real)(j-k)); // Weight by inverse of distance between words
-                if(symmetric > 0) bigram_table[lookup[w2-1] + w1 - 2] += 1.0/((real)(j-k)); // If symmetric context is used, exchange roles of w2 and w1 (ie look at right context too)
+                bigram_table[lookup[w1-1] + w2 - 2] += 1.0/((real)(j-k-nb)); // Weight by inverse of distance between words
+                if(symmetric > 0) bigram_table[lookup[w2-1] + w1 - 2] += 1.0/((real)(j-k-nb)); // If symmetric context is used, exchange roles of w2 and w1 (ie look at right context too)
             }
             else { // Product is too big, data is likely to be sparse. Store these entries in a temporary buffer to be sorted, merged (accumulated), and written to file when it gets full.
                 cr[ind].word1 = w1;
                 cr[ind].word2 = w2;
-                cr[ind].val = 1.0/((real)(j-k));
+                cr[ind].val = 1.0/((real)(j-k-nb));
                 ind++; // Keep track of how full temporary buffer is
                 if(symmetric > 0) { // Symmetric context
                     cr[ind].word1 = w2;
                     cr[ind].word2 = w1;
-                    cr[ind].val = 1.0/((real)(j-k));
+                    cr[ind].val = 1.0/((real)(j-k-nb));
                     ind++;
                 }
             }
+
+             if (bigram_history[k % window_size]) {
+                nb++;   //don't count this toward distance to next word
+            }
         }
-        history[j % window_size] = w2; // Target word is stored in circular buffer to become context word in the future
+
+          //bigram evicting a bigram... no change
+        if (isBigram(htmp->word) && bigram_history[j % window_size]){
+             // fprintf(stderr, "bigram to bigram %lld\n", j);
+             history[j % window_size] = w2;
+        } else if (isBigram(htmp->word)){ //bigram evicting a regular word... must extend the window size
+            // fprintf(stderr, "bigram to reg %lld\n", j);
+            long long *old_hist = history;
+            bool *old_big_hist = bigram_history;
+            history = (long long *)malloc(sizeof(long long) * (window_size + 1));
+            bigram_history = (bool*) malloc (sizeof(bool) * (window_size + 1));
+            for(k = j - 1; k >= ( (j > window_size) ? j - window_size : 0 ); k--) {
+                history[k % (window_size + 1)] = old_hist [k % window_size];
+                bigram_history[k % (window_size + 1)] = old_big_hist[k % window_size];
+            }
+            window_size++;
+            history[j % window_size] = w2;
+            bigram_history[j % window_size] = true;
+            free(old_hist);
+            free(old_big_hist);
+        } else if (bigram_history[j % window_size]){ //regular word evicting a bigram... must reduce the window size (and evict one ahead)
+              // fprintf(stderr, "reg to bigram %lld\n", j);
+            long long *old_hist = history;
+            bool *old_big_hist = bigram_history;
+            history = (long long *)malloc(sizeof(long long) * (window_size - 1));
+            bigram_history = (bool *) malloc (sizeof(bool) * (window_size - 1));
+            for(k = j - 1; k >= ( (j > window_size) ? j - window_size : 0 ) + 2; k--) { //plus 2 ensures we truncate by 2 elems
+                history[k % (window_size - 1)] = old_hist [k % window_size];
+                bigram_history[k % (window_size - 1)] = old_big_hist[k % window_size];
+            }
+            window_size--;
+            history[j % window_size] = w2;
+            bigram_history[j % window_size] = false;
+            free(old_hist);
+            free(old_big_hist);
+        } else {
+            history[j % window_size] = w2; // Target word is stored in circular buffer to become context word in the future
+        }
+
+        // history[j % window_size] = w2;
         j++;
     }
     
