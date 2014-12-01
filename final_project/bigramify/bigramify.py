@@ -20,29 +20,29 @@ if __name__ == '__main__':
 			bigrams[arr[0]+'_'+arr[1]] = 0 # tokenize
 
 	# Compute corpus occurences and modify corpus
-	# TODO: use nice python counters for this stuff (John, you python wiz, feel free to rewrite any of this)
 	print 'Computing corpus occurences and creating modified corpus...'
-	data = ""
+	newdata = []
 	with open('../glove/text8') as f:
-		data = f.read()
+		data = f.read().split() # split string by spaces
 
-		for t in bigrams:
-			arr = t.split('_');
-			l = list(find_all(data, arr[0]+' '+arr[1])) # array of indices
-
-			# Count
-			bigrams[t] += len(l)
-
-			# Adjust string: add bigram in the middle
-			data = data.replace(arr[0]+' '+arr[1], arr[0]+' '+t+' '+arr[1])
-
-			# If we need just the counts:
-			# bigrams[t] += data.count(t.split('_')[0]+' '+t.split('_')[1])
+		prev = ""
+		for w in data:
+			if prev == "":
+				prev = w
+				newdata.append(w)
+			else:
+				# Candidate
+				t = prev+"_"+w
+				if t in bigrams:
+					newdata.append(t)
+					bigrams[t] += 1
+				newdata.append(w)
+				prev = w
 
 	# Write updated data
 	print 'Writing updated corpus: ../glove/text8_bi'
 	with open("../glove/text8_bi", "w") as f:
-		f.write(data)
+		f.write(" ".join(newdata))
 
 	# Write bigram vocab
 	print 'Writing bigram vocabulary: ../glove/vocab_bi.txt'
