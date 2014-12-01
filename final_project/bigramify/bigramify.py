@@ -2,6 +2,11 @@
 
 import numpy as np
 
+CORPUS_INPUT_FILENAME = '../glove/data/text8'
+CORPUS_OUTPUT_FILENAME = '../glove/data/text8_bi'
+VOCAB_OUTPUT_FILENAME = '../glove/data/vocab_bi.txt'
+BIGRAMS_FILENAME = 'data/bigrams.txt' 
+
 def find_all(a_str, sub):
     start = 0
     while True:
@@ -14,7 +19,7 @@ if __name__ == '__main__':
 	# Read bigrams hash
 	print 'Loading bigrams...'
 	bigrams = {}
-	with open('data/bigrams.txt') as f:  # TODO: don't hardcode this; pass as arg
+	with open(BIGRAMS_FILENAME) as f:  # TODO: don't hardcode this; pass as arg
 		for line in f:
 			arr = line.split()
 			bigrams[arr[0]+'_'+arr[1]] = 0 # tokenize
@@ -22,7 +27,7 @@ if __name__ == '__main__':
 	# Compute corpus occurences and modify corpus
 	print 'Computing corpus occurences and creating modified corpus...'
 	newdata = []
-	with open('../glove/data/text8') as f:
+	with open(CORPUS_INPUT_FILENAME) as f:
 		data = f.read().split() # split string by spaces
 
 		prev = ""
@@ -40,16 +45,16 @@ if __name__ == '__main__':
 				prev = w
 
 	# Write updated data
-	print 'Writing updated corpus: ../glove/data/text8_bi'
-	with open("../glove/data/text8_bi", "w") as f:
+	print 'Writing updated corpus: '+CORPUS_OUTPUT_FILENAME
+	with open(CORPUS_OUTPUT_FILENAME, "w") as f:
 		# for w in newdata:
 		# 	f.write(w)
 		# 	f.write(" ")
 		f.write(" ".join(newdata))
 
 	# Write bigram vocab
-	print 'Writing bigram vocabulary: ../glove/data/vocab_bi.txt'
-	with open("../glove/data/vocab_bi.txt", "w") as f:
+	print 'Writing bigram vocabulary: '+VOCAB_OUTPUT_FILENAME
+	with open(VOCAB_OUTPUT_FILENAME, "w") as f:
 		for t in bigrams:
 			f.write(t+' '+str(bigrams[t])+'\n')
 
