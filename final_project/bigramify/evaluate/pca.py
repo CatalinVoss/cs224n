@@ -10,23 +10,9 @@ import matplotlib
 import pylab as pl
 
 
-
-def get_matrix (vecs):
-	wordVecsMatrix = [];
-	labels = [];
-	for key in vecs:
-		labels.append(key);
-		wordVecsMatrix.append(vecs[key])
-
-	return labels, np.matrix(wordVecsMatrix)
-
-
 if __name__ == '__main__':
-	print "Loading word vectors"
 	vecs = word_vecs.load("../data/vectors.txt")
-
-	print "Constructing data matrix"
-	labels, wordVecsMatrix = get_matrix(vecs)
+	labels, wordVecsMatrix = word_vecs.get_matrix(vecs)
 
 	print "Running PCA"
 	pca = PCA(n_components=2)
