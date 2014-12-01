@@ -22,7 +22,7 @@ if __name__ == '__main__':
 	# Compute corpus occurences and modify corpus
 	print 'Computing corpus occurences and creating modified corpus...'
 	newdata = []
-	with open('../glove/text8') as f:
+	with open('../glove/data/text8') as f:
 		data = f.read().split() # split string by spaces
 
 		prev = ""
@@ -40,13 +40,16 @@ if __name__ == '__main__':
 				prev = w
 
 	# Write updated data
-	print 'Writing updated corpus: ../glove/text8_bi'
-	with open("../glove/text8_bi", "w") as f:
+	print 'Writing updated corpus: ../glove/data/text8_bi'
+	with open("../glove/data/text8_bi", "w") as f:
+		# for w in newdata:
+		# 	f.write(w)
+		# 	f.write(" ")
 		f.write(" ".join(newdata))
 
 	# Write bigram vocab
-	print 'Writing bigram vocabulary: ../glove/vocab_bi.txt'
-	with open("../glove/vocab_bi.txt", "w") as f:
+	print 'Writing bigram vocabulary: ../glove/data/vocab_bi.txt'
+	with open("../glove/data/vocab_bi.txt", "w") as f:
 		for t in bigrams:
 			f.write(t+' '+str(bigrams[t])+'\n')
 

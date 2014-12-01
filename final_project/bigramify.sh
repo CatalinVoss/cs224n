@@ -6,14 +6,14 @@ cd ..
 # Load matlab module (used for evaluations later)
 module load matlab
 
-# Run GloVe
+# Run GloVe (from within glove directory)
 cd glove
 
-CORPUS=text8_bi
-VOCAB_FILE=vocab.txt
-COOCCURRENCE_FILE=cooccurrence.bin
-COOCCURRENCE_SHUF_FILE=cooccurrence.shuf.bin
-SAVE_FILE=vectors
+CORPUS=data/text8_bi
+VOCAB_FILE=data/vocab.txt
+COOCCURRENCE_FILE=data/cooccurrence.bin
+COOCCURRENCE_SHUF_FILE=data/cooccurrence.shuf.bin
+SAVE_FILE=data/vectors
 VERBOSE=2
 MEMORY=4.0
 VOCAB_MIN_COUNT=5
