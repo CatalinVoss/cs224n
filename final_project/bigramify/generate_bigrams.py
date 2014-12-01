@@ -8,8 +8,10 @@ import itertools
 MAX_ITER = 1000000
 CORPUS_FILENAME = '../glove/data/text8'
 STOPWORDS_FILENAME = 'data/stopwords.txt'
+OUTPUT_FILENAME = 'data/sampled_bigrams.txt'
 N_BIGRAMS = 2000
 EXCLUDE_STOPWORDS = True
+PICK_TOP = True # whether we want the top bigrams or just any we can find...
 
 # Randomized algorithm to identify k most common bigrams:
 #	Pick bigrams uniformly at random
@@ -27,15 +29,28 @@ if __name__ == '__main__':
 	bigrams = collections.Counter()
 	with open(CORPUS_FILENAME) as f:
 		print 'Reading corpus...'
+
+		random.seed()
 		data = f.read().split() # split string by spaces
 		print 'Done. Beginning sampling...'
 		N = len(data)
 
-		random.seed()
-
 		for _ in itertools.repeat(None, MAX_ITER):
 			x = random.randint(0,N-1)
 			if (not EXCLUDE_STOPWORDS) or (data[x-1] not in stopwords and data[x] not in stopwords) :
-				bigrams[data[x-1]+"_"+data[x]] += 1
+				bigrams[data[x-1]+" "+data[x]] += 1
 
-	print bigrams.most_common(N_BIGRAMS)
+	print 'Found top bigrams. Extracting...'
+	top_bigrams = []
+	if PICK_TOP:
+		top_bigrams = [b[0] for b in bigrams.most_common(N_BIGRAMS)]
+	else:
+		top_bigrams = [b[0] for b in bigrams.items()]
+		random.shuffle(top_bigrams)
+		top_bigrams = top_bigrams[:N_BIGRAMS] # keep arbitrary N_BIGRAMS only
+	
+	print 'Writing...'
+	with open(OUTPUT_FILENAME, 'w') as f:
+		for item in top_bigrams:
+			f.write("%s\n" % item)
+	print 'Done.'
