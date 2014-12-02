@@ -7,9 +7,9 @@ datapath = "../data/sentiment_data/"
 
 parser = argparse.ArgumentParser();
 parser.add_argument ("--verbose", type = bool, default = False);
-parser.add_argument ("--trainMatrix", type = str, default = 'unigram_avg_trainSentencesMatrix.npy')
+parser.add_argument ("--trainMatrix", type = str, default = 'bigrams_trainSentencesMatrix.npy')
 parser.add_argument ("--trainLabels", type = str, default = '3classTrainLabels.npy')
-parser.add_argument ("--testMatrix", type = str, default = 'unigram_avg_devSentencesMatrix.npy')
+parser.add_argument ("--testMatrix", type = str, default = 'bigrams_devSentencesMatrix.npy')
 parser.add_argument ("--testLabels", type = str, default = '3classDevLabels.npy')
 parser.add_argument ("--num_classes", type = int, default = 3) #note we only handle 3 and 5 class for now...
 

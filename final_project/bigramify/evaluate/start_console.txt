@@ -2,7 +2,7 @@ import nearest_neighbors as nn
 import train_bigram_approximation as ap
 import load_word_vecs as word_vecs
 
-vecs = word_vecs.load('../../glove/data/vectors.txt')
+vecs = word_vecs.load('../data/vectors.txt')
 labels, wordVecsMatrix = word_vecs.get_matrix(vecs)
 
-ap.train('../../glove/data/vectors.txt', '../../glove/data/vocab_bi.txt', 5)
+ap.train('../data/vectors.txt', '../data/vocab_bi.txt', 5)
