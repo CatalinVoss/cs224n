@@ -29,7 +29,7 @@ def build_vectors (filename):
 				avg = avg + word_vectors[word];
 				num_vectors += 1;
 
-		# avg = avg / num_vectors;
+		avg = avg / float(num_vectors);
 		vector_representations.append (avg);
 
 	return vector_representations;
@@ -43,4 +43,4 @@ if __name__ == "__main__":
 	for f in files:
 		vectors = build_vectors (f);
 		mat = np.matrix(vectors);
-		np.save("summed_" + f[:-4] + 'Matrix', mat);
+		np.save(f[:-4] + 'Matrix', mat);
