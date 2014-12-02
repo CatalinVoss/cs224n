@@ -3,6 +3,18 @@
 import heapq as hq
 import numpy as np
 
+def get_nns (X, labels, vec, k):
+	nn = []
+	for j in range(0, X.shape[0]):
+		dist = np.linalg.norm(vec - X[j, :])
+		hq.heappush(nn, (dist, j))
+
+	neighbors = []
+	for j in range(0, k):
+		distance, idx = hq.heappop(nn)
+		neighbors.append(labels[idx]);
+
+	return neighbors
 
 def nearest_neighbor_query(X, labels, word, k):
 	n_dict = nearest_neighbor_search(X, [labels.index(word)], k)
