@@ -5,7 +5,7 @@ import numpy as np
 CORPUS_INPUT_FILENAME = '../glove/data/text8'
 CORPUS_OUTPUT_FILENAME = '../glove/data/text8_bi'
 VOCAB_OUTPUT_FILENAME = '../glove/data/vocab_bi.txt'
-BIGRAMS_FILENAME = 'data/bigrams.txt' 
+BIGRAMS_FILENAME = 'data/sampled_bigrams.txt' 
 
 def find_all(a_str, sub):
     start = 0
