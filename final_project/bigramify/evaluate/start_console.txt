@@ -1,8 +1,9 @@
 import nearest_neighbors as nn
-import train_bigram_approximation as ap
+import test_bigrams as tb
 import load_word_vecs as word_vecs
 
 vecs = word_vecs.load('../data/vectors.txt')
-labels, wordVecsMatrix = word_vecs.get_matrix(vecs)
+label, matrix = word_vecs.get_matrix(vecs)
 
+import train_bigram_approximation as ap
 ap.train('../data/vectors.txt', '../data/vocab_bi.txt', 5)

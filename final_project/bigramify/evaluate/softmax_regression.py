@@ -6,11 +6,11 @@ from random import randrange
 
 epsilon = 10e-4;
 def check_gradients (gradient, X, Theta, Y, decay_param):
-	# for i in range (Theta.shape[0]):
-	# 	for j in range (Theta.shape[1]):
+	for i in range (Theta.shape[0]):
+		for j in range (Theta.shape[1]):
 	#pick a random i and a random j
-	i = randrange (Theta.shape[0])
-	j = randrange (Theta.shape[1])
+	# i = randrange (Theta.shape[0])
+	# j = randrange (Theta.shape[1])
 
 	theta_plus = np.matrix(Theta);
 	theta_plus[i, j] += epsilon;
@@ -23,7 +23,7 @@ def check_gradients (gradient, X, Theta, Y, decay_param):
 	numerical  = (plus - minus) / float(2*epsilon);
 
 	if abs(gradient[i, j] - numerical) > 10e-2:
-		print "We fucked up... Gradient: ", gradient[i, j], " numerical: ", numerical, "\n"
+		print "Gradient Error!... Gradient: ", gradient[i, j], " numerical: ", numerical, "\n"
 
 def cost_function (X, theta, Y, decay_param):
 	M = theta * X.transpose();

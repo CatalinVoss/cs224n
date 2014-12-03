@@ -34,17 +34,17 @@ if __name__ == '__main__':
 		for w in data:
 			if prev == "":
 				prev = w
-				# newdata.append(w)
+				newdata.append(w)
 			else:
 				# Candidate
 				t = prev+"_"+w
 				if t in bigrams:
 					newdata.append(t)
 					bigrams[t] += 1
-				# newdata.append(w)
-				else:
-					newdata.append(prev)
+				
+				newdata.append(w)
 				prev = w
+
 
 	# Write updated data
 	print 'Writing updated corpus: '+CORPUS_OUTPUT_FILENAME
