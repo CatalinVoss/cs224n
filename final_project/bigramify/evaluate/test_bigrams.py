@@ -5,7 +5,7 @@ import nearest_neighbors as nn
 import Queue as q
 import os
 
-bestTokenNum = 5
+bestTokenNum = 3
 vocabPath = os.path.expanduser('~/cs224n/cs224n/final_project/bigramify/data/vocab_bi.txt')
 # threshold = 1 could be tuned so that we only look at neighbor with an objective \leq threshold
 referenceBigrams = [line.split()[0] for line in open(vocabPath) if int(line.split()[1]) >= 5]
