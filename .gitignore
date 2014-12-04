@@ -6,3 +6,4 @@ final_project/glove/.*
 final_project/glove/temp_*
 final_project/bigramify/data/*
 final_project/bigramify/data/sentiment_data/*
+final_project/bigramify/data/vectors.txt
