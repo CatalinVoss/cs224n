@@ -25,6 +25,7 @@ def check_gradients (gradient, X, Theta, Y, decay_param):
 	if abs(gradient[i, j] - numerical) > 10e-2:
 		print "Gradient Error!... Gradient: ", gradient[i, j], " numerical: ", numerical, "\n"
 
+
 def cost_function (X, theta, Y, decay_param):
 	M = theta * X.transpose();
 	M = np.exp(M - np.max(M))

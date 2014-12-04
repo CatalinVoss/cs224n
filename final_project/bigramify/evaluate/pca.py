@@ -17,6 +17,12 @@ if __name__ == '__main__':
 
 	# pca.fit(wordVecsMatrix);
 	# reduced_X = pca.transform(wordVecsMatrix)
+	# labels, wordVecsMatrix = word_vecs.get_matrix(vecs)
+
+	# print "Running PCA"
+	# pca = PCA(n_components=2)
+	# pca.fit(wordVecsMatrix);
+	# reduced_X = pca.transform(wordVecsMatrix)
 	# fig = pl.figure()
 	# ax = fig.add_subplot(111, projection='3d')
 
@@ -89,6 +95,7 @@ if __name__ == '__main__':
 	pl.xlabel("First Principal Component")
 	pl.ylabel ("Second Principal Component")
 	pl.title("Naive Averaging versus Local Nearest Neighbors Algorithm")
+
 
 	for i, word in enumerate(words):
 		pl.annotate("%s" % word, xy = (float(X[i]), float(Y[i])), size = 10)
