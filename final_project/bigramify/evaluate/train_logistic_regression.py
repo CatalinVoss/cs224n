@@ -59,7 +59,7 @@ def train(vectors_filename, vocab_filename, vocab_thresh):
 	regressors = []
 	for i in range(n): # 0..n-1
 		print 'Training regressor '+str(i)
-		clf = SVR(C=1.0, epsilon=0.2, verbose=True)
+		clf = linear_model.LogisticRegression(C=1e5) #SVR(C=1.0, epsilon=0.2, verbose=True)
 		y = Y[:,i]
 		# print np.array(y.ravel())[0]
 		clf.fit(B, np.array(y.ravel())[0]) 
@@ -67,7 +67,7 @@ def train(vectors_filename, vocab_filename, vocab_thresh):
 	
 	# Save to disk:
 	print 'Saving regressors'
-	with open('regressors_big.pkl', 'wb') as f:
+	with open('logistic_regressors_big.pkl', 'wb') as f:
 		cPickle.dump(regressors, f)
 
 	# # Component-wise regression
@@ -100,7 +100,7 @@ def predict(v1, v2):
 	global regressors
 	if len(regressors) == 0:
 		# Load regressors
-		with open('regressors_big.pkl', 'rb') as f:
+		with open('logistic_regressors_big.pkl', 'rb') as f:
 			regressors = cPickle.load(f)
 
 	b = np.matrix(np.concatenate((v1,v2)))
