@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import sys
-sys.path.insert(0, 'evaluate')
+# import sys
+# sys.path.insert(0, 'evaluate')
 
 import numpy as np
 import random
