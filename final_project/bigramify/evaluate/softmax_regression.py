@@ -6,11 +6,11 @@ from random import randrange
 
 epsilon = 10e-4;
 def check_gradients (gradient, X, Theta, Y, decay_param):
-	for i in range (Theta.shape[0]):
-		for j in range (Theta.shape[1]):
-	#pick a random i and a random j
-	# i = randrange (Theta.shape[0])
-	# j = randrange (Theta.shape[1])
+	# for i in range (Theta.shape[0]):
+	# 	for j in range (Theta.shape[1]):
+	# pick a random i and a random j
+	i = randrange (Theta.shape[0])
+	j = randrange (Theta.shape[1])
 
 	theta_plus = np.matrix(Theta);
 	theta_plus[i, j] += epsilon;

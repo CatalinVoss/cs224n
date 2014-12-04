@@ -49,7 +49,7 @@ def local_knn_pred (vecs, w1, w2):
 	best_tokens = get_top_bigrams(vecs, v1, v2)
 
 	#average over nearest bigrams
-	avg = np.zeros(50)
+	avg = np.zeros(300)
 	for token in best_tokens:
 		avg += vecs[token[0] + "_" + token[1]] - vecs[token[0]] - vecs[token[1]] + v1 + v2
 

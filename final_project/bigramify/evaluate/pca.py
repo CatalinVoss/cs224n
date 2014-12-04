@@ -26,8 +26,8 @@ if __name__ == '__main__':
 
 	#words to plot
 	# words = ["great", "decent", "good", "horrible", "bad", "movie", "book", "friend", "great_"]
-	adj = ["red", "green"]
-	noun =  ["car", "rocket", "house"]
+	adj = ["small", "big", "fast"]
+	noun =  ["car", "dog"]
 	words = adj + noun
 	for a in adj:
 		for n in noun:

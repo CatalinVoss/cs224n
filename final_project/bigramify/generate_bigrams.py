@@ -9,7 +9,7 @@ MAX_ITER = 1000000
 CORPUS_FILENAME = '../glove/data/text8'
 STOPWORDS_FILENAME = 'data/stopwords.txt'
 OUTPUT_FILENAME = 'data/sampled_bigrams.txt'
-N_BIGRAMS = 30000
+N_BIGRAMS = 50000
 EXCLUDE_STOPWORDS = True
 PICK_TOP = True # whether we want the top bigrams or just any we can find...
 
