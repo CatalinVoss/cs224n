@@ -2,10 +2,10 @@
 
 import numpy as np
 
-CORPUS_INPUT_FILENAME = '../glove/data/text8'
-CORPUS_OUTPUT_FILENAME = '../glove/data/text8_bi'
-VOCAB_OUTPUT_FILENAME = '../glove/data/vocab_bi.txt'
-BIGRAMS_FILENAME = 'data/sampled_bigrams.txt' 
+CORPUS_INPUT_FILENAME = '../glove/data/text8_14m'
+CORPUS_OUTPUT_FILENAME = '../glove/data/text8_14m_bi'
+VOCAB_OUTPUT_FILENAME = '../glove/data/vocab_14m_bi.txt'
+BIGRAMS_FILENAME = 'data/sampled_bigrams_14m.txt' 
 
 def find_all(a_str, sub):
     start = 0

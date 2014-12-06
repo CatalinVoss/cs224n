@@ -9,6 +9,15 @@ import load_word_vecs as word_vecs
 from sklearn import linear_model, datasets
 from sklearn.svm import SVR
 import cPickle
+import os
+import argparse
+
+
+parser = argparse.ArgumentParser();
+parser.add_argument ("row", type = int)
+
+regressorPath = os.path.expanduser('~/cs224n/cs224n/final_project/bigramify/evaluate/')
+
 
 # Load vocab bigrams
 def load_bigrams(vocab_filename, vocab_thresh):
@@ -28,10 +37,11 @@ def get_training_data(vectors_filename, vocab_filename, vocab_thresh):
 	print 'Constructing matrix B row-wise'
 	B = np.zeros(shape=(N,2*n))
 	for idx, label in enumerate(bigrams_vocab):
-		b_1 = word_vectors[label.split('_')[0]]
-		b_2 = word_vectors[label.split('_')[1]]
-		row = np.concatenate((b_1,b_2))
-		B[idx] = row
+		if label in word_vectors:
+			b_1 = word_vectors[label.split('_')[0]]
+			b_2 = word_vectors[label.split('_')[1]]
+			row = np.concatenate((b_1,b_2))
+			B[idx] = row
 		# if idx > 5000:
 		# 	break
 	# B = np.matrix(B)
@@ -40,8 +50,9 @@ def get_training_data(vectors_filename, vocab_filename, vocab_thresh):
 	print 'Constructing matrix Y row-wise'
 	Y = np.zeros(shape=(N,n))
 	for idx, label in enumerate(bigrams_vocab):
-		row = word_vectors[label]
-		Y[idx] = row
+		if label in word_vectors:
+			row = word_vectors[label]
+			Y[idx] = row
 		# if idx > 5000:
 		# 	break
 	Y = np.matrix(Y) # turn this bad boy into a matrix
@@ -52,22 +63,23 @@ def get_training_data(vectors_filename, vocab_filename, vocab_thresh):
 
 	return B, Y
 
-def train(vectors_filename, vocab_filename, vocab_thresh):
+def train(vectors_filename, vocab_filename, vocab_thresh, i):
 	B, Y = get_training_data(vectors_filename, vocab_filename, vocab_thresh)
+	print B.shape
 
-	n = 50
+	n = Y.shape[1]
 	regressors = []
-	for i in range(n): # 0..n-1
-		print 'Training regressor '+str(i)
-		clf = SVR(C=1.0, epsilon=0.2, verbose=True)
-		y = Y[:,i]
-		# print np.array(y.ravel())[0]
-		clf.fit(B, np.array(y.ravel())[0]) 
-		regressors.append(clf)
+	# for i in range(n): # 0..n-1
+	print 'Training regressor '+str(i)
+	clf = SVR(C=1.0, epsilon=0.2, verbose=True)
+	y = Y[:,i]
+	# print np.array(y.ravel())[0]
+	clf.fit(B, np.array(y.ravel())[0]) 
+	regressors.append(clf)
 	
 	# Save to disk:
 	print 'Saving regressors'
-	with open('regressors_big.pkl', 'wb') as f:
+	with open('regressors2m/regressors_' + str(i) + '.pkl', 'wb') as f:
 		cPickle.dump(regressors, f)
 
 	# # Component-wise regression
@@ -100,28 +112,31 @@ def predict(v1, v2):
 	global regressors
 	if len(regressors) == 0:
 		# Load regressors
-		with open('regressors_big.pkl', 'rb') as f:
+		with open(regressorPath + 'regressors_big.pkl', 'rb') as f:
 			regressors = cPickle.load(f)
 
 	b = np.matrix(np.concatenate((v1,v2)))
 
-	result = np.empty(50)
+	result = np.empty(300)
 	for idx, r in enumerate(regressors):
 		b = np.matrix(np.concatenate((v1,v2)))
-		result[idx] = r.predict(b)[0]
+		result[idx] = r[0].predict(b)
 		# print r.predict(b)[0]
 
 	return result
 
 if __name__ == '__main__':
 	# Constants
-	VOCAB_FILENAME = '../../glove/data/vocab_bi.txt'
+	VOCAB_FILENAME = '../../glove/data/vocab_2m_bi.txt'
 	VOCAB_THRESH = 5 # needs to be at least that of GloVe (otherwise the vocab bigrams won't occur in the vectors file)
-	VECTORS_FILENAME = '../../glove/data/vectors.txt'
+	VECTORS_FILENAME = '../../glove/data/vectors300_2m.txt'
+
+	args = parser.parse_args()
+	i = args.row - 1
 
 	# Tain:
 	print 'Training bigram net'
-	train(VECTORS_FILENAME, VOCAB_FILENAME, VOCAB_THRESH)
+	train(VECTORS_FILENAME, VOCAB_FILENAME, VOCAB_THRESH, i)
 
 	# # Test
 	# word_vectors = word_vecs.load(VECTORS_FILENAME);

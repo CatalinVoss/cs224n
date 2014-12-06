@@ -1,7 +1,7 @@
 # Bigramify
-cd bigramify
-python bigramify.py
-cd ..
+# cd bigramify
+# python bigramify.py
+# cd ..
 
 # Load matlab module (used for evaluations later)
 module load matlab
@@ -9,11 +9,11 @@ module load matlab
 # Run GloVe (from within glove directory)
 cd glove
 
-CORPUS=data/text8_bi
-VOCAB_FILE=data/vocab.txt
-COOCCURRENCE_FILE=data/cooccurrence.bin
+CORPUS=data/text8_14m_bi
+VOCAB_FILE=data/vocab_14m_bi.txt
+COOCCURRENCE_FILE=datacooccurrence.bin
 COOCCURRENCE_SHUF_FILE=data/cooccurrence.shuf.bin
-SAVE_FILE=data/vectors300
+SAVE_FILE=data/vectors300_14m
 VERBOSE=2
 MEMORY=4.0
 VOCAB_MIN_COUNT=5

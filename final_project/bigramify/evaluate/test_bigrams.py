@@ -1,15 +1,72 @@
 #!/usr/bin/env python
+
+##
+# This file is unfortunately poorly named, but is the core of our prediction routine 
+# for estimate a bigram representation from constituent unigrams
+#
 import numpy as np
 import heapq as hq
 import nearest_neighbors as nn
 import Queue as q
 import os
 
-bestTokenNum = 3
-vocabPath = os.path.expanduser('~/cs224n/cs224n/final_project/bigramify/data/vocab_bi.txt')
-# threshold = 1 could be tuned so that we only look at neighbor with an objective \leq threshold
-referenceBigrams = [line.split()[0] for line in open(vocabPath) if int(line.split()[1]) >= 5]
+best_token_number = 5
+#path to the list of seed set bigrams
+seed_bigrams = os.path.expanduser('~/cs224n/cs224n/final_project/bigramify/data/vocab_bi.txt')
 
+#read the seed set bigrams into a list
+referenceBigrams = [line.split()[0] for line in open(seed_bigrams) if int(line.split()[1]) >= 5]
+
+######
+#Helpers
+######
+def optimal_blending_objective (vecs, b, v1, v2, objective):
+	if objective == "cosine":
+		return (np.dot(v1, vecs[b[0]]) / (np.linalg.norm(v1) * np.linalg.norm(vecs[b[0]]))) + \
+					 (np.dot(v2, vecs[b[1]]) / (np.linalg.norm(v2) * np.linalg.norm(vecs[b[1]])))
+	else: #default is the \ell_2 norm
+		#negative since this is a minimization problem
+		return - (np.linalg.norm(v1 - vecs[b[0]]) + np.linalg.norm(v2 - vecs[b[1]]))
+
+
+def get_top_bigrams (vecs, v1, v2, objective):
+	best_tokens = [] 
+	for bigram in referenceBigrams:
+		b = bigram.split("_")
+		if b[0] in vecs and b[1] in vecs and bigram in vecs:
+			obj_val =  optimal_blending_objective(vecs, b, v1, v2, objective)
+
+			if len(best_tokens) < best_token_number:
+				hq.heappush (best_tokens, (obj_val, b))
+			elif min(best_tokens)[0] < (obj_val):
+				hq.heapreplace(best_tokens, (obj_val, b)) #removes the minimum and pushes the new token
+		
+	return [hq.heappop(best_tokens) for i in range(best_token_number)]
+
+#Optimal Bigram Blend Prediction. OBJECTIVE should be either 'cosine' or 'norm' (norm by default)
+def local_knn_pred (vecs, w1, w2, objective):
+	#if the token is a trained_bigram, return that token
+	if w1 + "_" + w2 in vecs:
+		return vecs[w1 + "_" + w2]
+
+	v1 = vecs[w1]
+	v2 = vecs[w2]
+	
+	best_tokens = get_top_bigrams(vecs, v1, v2, objective)
+
+	weights = [token[0] for token in best_tokens]
+	best_tokens = [token[1] for token in best_tokens]
+
+	max_weight = max(weights) + 0.01 #avoid division by 0
+
+	#average over nearest bigrams
+	avg = np.zeros(300)
+	for idx, token in enumerate(best_tokens):
+		avg += (weights[idx] / max_weight)*(vecs[token[0] + "_" + token[1]] - vecs[token[0]] - vecs[token[1]] + v1 + v2)
+
+	return avg / float (np.linalg.norm(weights))
+
+#computes the objective for a single nearest neighbor and returns the nearest neighbors
 def simple_prediction(wordMatrix, labels, vecs, w1, w2):
 	v1 = vecs[w1]
 	v2 = vecs[w2]	
@@ -27,34 +84,7 @@ def simple_prediction(wordMatrix, labels, vecs, w1, w2):
 	return nn.get_nns (wordMatrix, labels, test, 5)
 
 
-def get_top_bigrams (vecs, v1, v2):
-	best_tokens = []
-	for bigram in referenceBigrams:
-		b = bigram.split("_")
-		if b[0] in vecs and b[1] in vecs and bigram in vecs:
-			obj_val = np.linalg.norm(v1 - vecs[b[0]]) + np.linalg.norm(v2 - vecs[b[1]]) # todo!!+ frequency term
-
-			#-obj_value ensures the smallest elements are those w/ largest objective
-			if len(best_tokens) < bestTokenNum:
-				hq.heappush (best_tokens, (-obj_val, b))
-			elif min(best_tokens)[0] < (-obj_val):
-				hq.heapreplace(best_tokens, (-obj_val, b)) #removes the mininmum (i..e largest obj_value) and pushes the new token
-		
-	return [hq.heappop(best_tokens)[1] for i in range(bestTokenNum)]
-
-def local_knn_pred (vecs, w1, w2):
-	v1 = vecs[w1]
-	v2 = vecs[w2]
-	#find the NUM_BEST_TOKENS best tokens
-	best_tokens = get_top_bigrams(vecs, v1, v2)
-
-	#average over nearest bigrams
-	avg = np.zeros(300)
-	for token in best_tokens:
-		avg += vecs[token[0] + "_" + token[1]] - vecs[token[0]] - vecs[token[1]] + v1 + v2
-
-	return avg / float (len(best_tokens))
-
+#local least squares prediction... Empirical results are quite poor
 def local_ls_pred(vecs, w1, w2):
 	v1 = vecs[w1]
 	v2 = vecs[w2]

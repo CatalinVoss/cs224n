@@ -4,6 +4,8 @@ final_project/glove/data/*
 final_project/glove/overflow_*
 final_project/glove/.*
 final_project/glove/temp_*
+final_project/bigramify/data/vectors.txt
 final_project/bigramify/data/*
 final_project/bigramify/data/sentiment_data/*
 final_project/bigramify/data/vectors.txt
+final_project/bigramify/sentiment_task/reference_unigrams.txt

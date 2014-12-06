@@ -6,14 +6,10 @@ import collections
 import itertools
 
 MAX_ITER = 1000000
-CORPUS_FILENAME = '../glove/data/text8'
+CORPUS_FILENAME = '../glove/data/text8_14m'
 STOPWORDS_FILENAME = 'data/stopwords.txt'
-OUTPUT_FILENAME = 'data/sampled_bigrams.txt'
-<<<<<<< HEAD
-N_BIGRAMS = 50000
-=======
+OUTPUT_FILENAME = 'data/sampled_bigrams_14m.txt'
 N_BIGRAMS = 30000
->>>>>>> d0194d0759abf763d4a1ac88821f8eea00b22713
 EXCLUDE_STOPWORDS = True
 PICK_TOP = True # whether we want the top bigrams or just any we can find...
 

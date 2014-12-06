@@ -1,7 +1,6 @@
 import numpy as np
 
 import nearest_neighbors as nn
-<<<<<<< HEAD
 import test_bigrams as tb
 import load_word_vecs as word_vecs
 
@@ -12,15 +11,3 @@ import train_bigram_approximation as ap
 ap.train('../data/vectors.txt', '../data/vocab_bi.txt', 5)
 
 nn.get_nns(wordVecsMatrix, labels, v, 10)
-=======
-import train_bigram_approximation as ap
-import load_word_vecs as word_vecs
-
-vecs = word_vecs.load('../../glove/data/vectors.txt')
-labels, wordVecsMatrix = word_vecs.get_matrix(vecs)
-
-ap.train('../../glove/data/vectors.txt', '../../glove/data/vocab_bi.txt', 5)
-
-v = ap.predict(vecs['civil'], vecs['war'])
-nn.get_nns(wordVecsMatrix, labels, v, 10)
->>>>>>> d0194d0759abf763d4a1ac88821f8eea00b22713

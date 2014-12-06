@@ -8,7 +8,7 @@ if __name__ == '__main__':
 	labels, wordVecsMatrix = word_vecs.get_matrix(vecs)
 
 	print "Running K means clustering..."
-	kmeans = KMeans(n_clusters = 500)
+	kmeans = KMeans(n_clusters = 3000)
 	kmeans.fit(wordVecsMatrix)
 	clusters = kmeans.predict(wordVecsMatrix)
 

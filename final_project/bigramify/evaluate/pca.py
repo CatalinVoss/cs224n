@@ -9,15 +9,17 @@ import test_bigrams as tb
 import matplotlib
 import pylab as pl
 
+import train_neural_network as tnn
+
 
 if __name__ == '__main__':
 	vecs = word_vecs.load("../data/vectors.txt")
+	labels, wordVecsMatrix = word_vecs.get_matrix(vecs)
 	pca = PCA(n_components=2)
 
 
 	# pca.fit(wordVecsMatrix);
 	# reduced_X = pca.transform(wordVecsMatrix)
-	# labels, wordVecsMatrix = word_vecs.get_matrix(vecs)
 
 	# print "Running PCA"
 	# pca = PCA(n_components=2)
@@ -31,14 +33,16 @@ if __name__ == '__main__':
 	# plt.show()
 
 	#words to plot
-	# words = ["great", "decent", "good", "horrible", "bad", "movie", "book", "friend", "great_"]
-	adj = ["small", "big", "fast"]
-	noun =  ["car", "dog"]
-	words = adj + noun
-	for a in adj:
-		for n in noun:
-			words.append(a+"_"+n+"_avg")
-			words.append(a+"_"+n+"_knn")
+	words = ["red_car_l2", "green_car_l2", "red", "green", "rocket", "red_rocket_avg", "red_rocket_l2", "green_rocket_avg", "green_rocket_l2", "car", "red_car_avg", "green_car_avg"] 
+	# adj = ["", "big", "fast"]
+	# noun =  ["car", "dog"]
+	# words = adj + noun
+	# for a in adj:
+	# 	for n in noun:
+	# 		words.append(a+"_"+n+"_avg")
+	# 		words.append(a+"_"+n+"_cos")
+	# 		words.append(a+"_"+n+"_l2")
+
 
 	#runs pca on the smaller matrix we construct....
 	####################
@@ -50,11 +54,20 @@ if __name__ == '__main__':
 			tokens = word.split('_')
 			avg = (vecs[tokens[0]] + vecs[tokens[1]]) / 2.0
 			B.append(avg)
-		elif "knn" in word:
+		elif "l2" in word:
 			tokens = word.split('_')
-			B.append(tb.local_knn_pred(vecs, tokens[0], tokens[1]))
+			B.append(tb.local_knn_pred(vecs, tokens[0], tokens[1], "norm"))
+		elif "cos" in word:
+			tokens = word.split('_')
+			B.append(tb.local_knn_pred(vecs, tokens[0], tokens[1], "cos"))
+		elif "svr" in word:
+			tokens = word.split('_')
+			B.append(tnn.pred(vecs[tokens[0]], vecs[tokens[1]]))
 
 	B = np.matrix(B)
+
+	# add other non-plotted bigrams to the matrix before running PCA
+	B = np.concatenate((B, wordVecsMatrix[1:500, :]))
 	print "Running PCA"
 	pca.fit(B)
 	B = pca.transform(B)
@@ -89,12 +102,14 @@ if __name__ == '__main__':
 	#########################
 
 	print "PCA finished. Plotting data..."
-	X = list(B[:, 0])
-	Y = list(B[:, 1])
+	X = list(B[0:len(words), 0])
+	Y = list(B[0:len(words), 1])
+
+
 	pl.scatter(X, Y, 20)
 	pl.xlabel("First Principal Component")
 	pl.ylabel ("Second Principal Component")
-	pl.title("Naive Averaging versus Local Nearest Neighbors Algorithm")
+	pl.title("Unigram Averaging versus Optimal Bigram Blending (L2 Distance)")
 
 
 	for i, word in enumerate(words):
