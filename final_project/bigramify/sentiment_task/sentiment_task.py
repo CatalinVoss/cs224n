@@ -3,7 +3,7 @@ import numpy as np
 import softmax_regression as softmax
 import argparse
 
-datapath = "/"
+datapath = ""
 
 parser = argparse.ArgumentParser();
 parser.add_argument ("--verbose", type = bool, default = False);
